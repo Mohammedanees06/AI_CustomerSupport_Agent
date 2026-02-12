@@ -1,0 +1,337 @@
+FRONTEND (React + Tailwind + Redux)
+
+client/
+├── public/
+│   └── widget.js
+│      // Chat widget script that businesses embed on their website
+│      // This connects to our backend and opens the AI chat
+│
+├── src/
+│   ├── app/
+│   │   ├── App.jsx
+│   │   │   // Main React component
+│   │   │   // Loads routes and global providers
+│   │   │
+│   │   ├── routes.jsx
+│   │   │   // All application routes in one file
+│   │   │   // Example: /login, /dashboard, /chat
+│   │   │
+│   │   └── providers.jsx
+│   │       // Wraps app with Redux, Socket, and Language providers
+│
+│   ├── store/
+│   │   ├── index.js
+│   │   │   // Creates Redux store using Redux Toolkit
+│   │   │
+│   │   ├── auth.slice.js
+│   │   │   // Stores login user, token, business info
+│   │   │
+│   │   ├── chat.slice.js
+│   │   │   // Stores chat messages, active conversation, unread count
+│   │   │
+│   │   ├── voice.slice.js
+│   │   │   // Stores voice call state (ringing, active, muted)
+│   │   │
+│   │   └── app.slice.js
+│   │       // Stores app-wide settings (theme, language, alerts)
+│
+│   ├── components/
+│   │   ├── common/
+│   │   │   ├── Button.jsx
+│   │   │   │   // Reusable button component
+│   │   │   │
+│   │   │   ├── Modal.jsx
+│   │   │   │   // Reusable popup/modal
+│   │   │   │
+│   │   │   └── Loader.jsx
+│   │   │       // Loading spinner
+│   │   │
+│   │   ├── chat/
+│   │   │   ├── ChatBox.jsx
+│   │   │   │   // Main chat UI container
+│   │   │   │
+│   │   │   ├── Message.jsx
+│   │   │   │   // Single chat message bubble
+│   │   │   │
+│   │   │   └── VoiceButton.jsx
+│   │   │       // Button to start or stop AI voice call
+│   │   │
+│   │   └── dashboard/
+│   │       ├── StatsCard.jsx
+│   │       │   // Shows analytics numbers
+│   │       │
+│   │       └── Chart.jsx
+│   │           // Displays graphs (calls, chats, usage)
+│
+│   ├── features/
+│   │   ├── auth/
+│   │   │   ├── auth.api.js
+│   │   │   │   // All login/signup API calls
+│   │   │   │
+│   │   │   └── auth.thunks.js
+│   │   │       // Async Redux actions for auth
+│   │   │
+│   │   ├── chat/
+│   │   │   ├── chat.api.js
+│   │   │   │   // Chat-related API calls
+│   │   │   │
+│   │   │   ├── chat.socket.js
+│   │   │   │   // WebSocket events (send/receive messages)
+│   │   │   │
+│   │   │   └── chat.thunks.js
+│   │   │       // Async chat actions
+│   │   │
+│   │   ├── voice/
+│   │   │   ├── voice.api.js
+│   │   │   │   // Voice call API calls
+│   │   │   │
+│   │   │   └── voice.thunks.js
+│   │   │       // Async voice actions
+│   │   │
+│   │   └── analytics/
+│   │       └── analytics.api.js
+│   │           // Fetch dashboard analytics data
+│
+│   ├── hooks/
+│   │   ├── useAuth.js
+│   │   │   // Custom hook for auth logic
+│   │   │
+│   │   ├── useSocket.js
+│   │   │   // Handles socket connection and cleanup
+│   │   │
+│   │   └── useVoice.js
+│   │       // Handles microphone and audio stream
+│
+│   ├── services/
+│   │   ├── apiClient.js
+│   │   │   // Axios setup with base URL and headers
+│   │   │
+│   │   ├── socketClient.js
+│   │   │   // Creates socket connection once
+│   │   │
+│   │   └── i18n.js
+│   │       // Language translation setup
+│
+│   ├── utils/
+│   │   ├── constants.js
+│   │   │   // Fixed values (roles, limits)
+│   │   │
+│   │   ├── formatters.js
+│   │   │   // Format dates, currency, phone numbers
+│   │   │
+│   │   └── validators.js
+│   │       // Input validation helpers
+│
+│   ├── styles/
+│   │   └── index.css
+│   │       // Global Tailwind styles
+│
+│   └── main.jsx
+│       // React entry point
+│
+└── package.json
+
+
+BACKEND (Node + Express + Redis + AI)
+server/
+├── src/
+│   ├── app.js
+│   │   // Creates express app
+│   │   // Registers middleware and routes
+│
+│   ├── server.js
+│   │   // Starts HTTP server and WebSocket server
+│
+│   ├── config/
+│   │   ├── env.js
+│   │   │   // Loads environment variables
+│   │   │
+│   │   ├── db.js
+│   │   │   // Connects to MongoDB
+│   │   │
+│   │   ├── redis.js
+│   │   │   // Connects to Redis
+│   │   │
+│   │   └── socket.js
+│   │       // Configures Socket.io with Redis adapter
+│
+│   ├── routes/
+│   │   ├── auth.routes.js
+│   │   │   // Login and signup endpoints
+│   │   │
+│   │   ├── chat.routes.js
+│   │   │   // Chat message APIs
+│   │   │
+│   │   ├── voice.routes.js
+│   │   │   // Voice call webhooks (Twilio/Exotel)
+│   │   │
+│   │   ├── business.routes.js
+│   │   │   // Business setup, FAQ upload, policies
+│   │   │
+│   │   └── analytics.routes.js
+│   │       // Dashboard analytics APIs
+│
+│   ├── controllers/
+│   │   ├── auth.controller.js
+│   │   │   // Handles auth request and response
+│   │   │
+│   │   ├── chat.controller.js
+│   │   │   // Handles chat requests
+│   │   │
+│   │   ├── voice.controller.js
+│   │   │   // Handles incoming voice calls
+│   │   │
+│   │   └── business.controller.js
+│   │       // Handles business data
+│
+│   ├── services/
+│   │   ├── ai/
+│   │   │   ├── ai.service.js
+│   │   │   │   // Calls AI model to generate response
+│   │   │   │
+│   │   │   ├── embedding.service.js
+│   │   │   │   // Converts text to embeddings
+│   │   │   │
+│   │   │   ├── rag.service.js
+│   │   │   │   // Fetches relevant business data
+│   │   │   │
+│   │   │   └── tts.service.js
+│   │   │       // Converts AI text to voice
+│   │   │
+│   │   ├── voice/
+│   │   │   ├── stt.service.js
+│   │   │   │   // Converts voice to text
+│   │   │   │
+│   │   │   └── call.service.js
+│   │   │       // Manages call flow
+│   │   │
+│   │   ├── cache/
+│   │   │   └── redis.service.js
+│   │   │       // Get/set data in Redis
+│   │   │
+│   │   ├── queue/
+│   │   │   ├── ai.queue.js
+│   │   │   │   // Push AI tasks to queue
+│   │   │   │
+│   │   │   └── worker.js
+│   │   │       // Processes queued AI jobs
+│   │   │
+│   │   ├── socket/
+│   │   │   └── socket.service.js
+│   │   │       // Emits real-time events
+│   │   │
+│   │   └── integrations/
+│   │       ├── shopify.service.js
+│   │       │   // Shopify order integration
+│   │       │
+│   │       └── woocommerce.service.js
+│   │           // WooCommerce order integration
+│
+│   ├── models/
+│   │   ├── User.model.js
+│   │   │   // User schema
+│   │   │
+│   │   ├── Business.model.js
+│   │   │   // Business data schema
+│   │   │
+│   │   ├── Message.model.js
+│   │   │   // Chat messages schema
+│   │   │
+│   │   ├── Ticket.model.js
+│   │   │   // Support ticket schema
+│   │   │
+│   │   └── Order.model.js
+│   │       // Order data schema
+│
+│   ├── middlewares/
+│   │   ├── auth.middleware.js
+│   │   │   // Protects private routes
+│   │   │
+│   │   ├── rateLimit.middleware.js
+│   │   │   // Prevents abuse
+│   │   │
+│   │   └── error.middleware.js
+│   │       // Handles errors centrally
+│
+│   ├── utils/
+│   │   ├── logger.js
+│   │   │   // Logs errors and info
+│   │   │
+│   │   ├── constants.js
+│   │   │   // Fixed backend values
+│   │   │
+│   │   └── helpers.js
+│   │       // Small reusable helpers
+│
+│   └── jobs/
+│       └── ai.job.js
+│           // Background AI job logic
+│
+├── .env
+│   // Secrets and keys
+│
+├── package.json
+└── README.md
+
+
+What is Redis?
+Redis keeps data that is needed right now in fast memory, used for
+caching, shared memory, scaling apps
+So: App does NOT go to database every time, App gets data instantly
+
+Why database is slow
+Database (MongoDB):
+Stores data on disk
+Reads take more time
+Good for permanent storage
+
+Redis:
+Stores data in RAM
+Reads are very very fast
+Good for temporary data
+
+Without Redis ❌
+
+User asks:
+“What are your store timings?”
+App: Go to database->Read data->Send repl->This happens every time → slow.
+
+With Redis ✅
+First time: App gets answer from database->Saves it in Redis
+Next time:App gets answer directly from Redis->No database call->Much faster.
+
+Local Redis
+Local Redis means Redis runs on your own computer.
+Features:
+No API key, No internet needed, Used for development & learning,Runs on localhost:6379
+
+Cloud Redis
+
+Cloud Redis means Redis runs on another server (online).
+Examples:
+Upstash
+Redis Cloud
+AWS ElastiCache
+Features:
+Needs URL / password
+Used in production
+Accessible from anywhere
+
+Why we used Docker
+Windows cannot run Redis easily.
+
+Docker:
+
+Runs Redis in a small container
+No installation headache
+Works like real server Redis
+
+How Docker Redis works (Simple)
+Docker starts Redis
+Redis waits on port 6379
+Your backend connects to it
+Redis is ready
+Command we used:
+docker run -d -p 6379:6379 redis
+
+USER FLOW: User → Browser → Backend → Redis → Backend → User
