@@ -22,6 +22,8 @@ export const register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log("REQ BODY FULL:", req.body);
+console.log("PASSWORD:", req.body.password);
 
     const user = await User.create({
       name,
@@ -36,7 +38,7 @@ export const register = async (req, res) => {
         email: user.email,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "50d" }
     );
 
     res.status(201).json({
@@ -49,7 +51,10 @@ export const register = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Registration failed" });
+    res.status(500).json({
+    message: "Registration failed",
+    error: error.message
+  });
   }
 };
 
@@ -79,7 +84,7 @@ export const login = async (req, res) => {
         email: user.email,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "50d" }
     );
 
     res.status(200).json({

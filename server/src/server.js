@@ -1,10 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config({ path: "./.env" });
-
 import express from "express";
 import cors from "cors";
 import passport from "passport";
-
 import "./config/passport.js";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -12,6 +10,7 @@ import chatRoutes from "./routes/chat.routes.js";
 import businessRoutes from "./routes/business.routes.js";
 import { initSocket } from "./config/socket.js";
 import "./config/redis.js";
+import knowledgeRoutes from "./routes/knowledge.routes.js";
 
 
 connectDB();
@@ -26,6 +25,7 @@ app.use(passport.initialize());
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/business", businessRoutes);
+app.use("/api/knowledge", knowledgeRoutes);
 
 // 1. Assign the result of app.listen to 'server'
 const server = app.listen(process.env.PORT, () =>
