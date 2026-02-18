@@ -13,7 +13,7 @@ export const getAIReply = async (message, context, conversationHistory = []) => 
 
   // Build conversation history
   const historyContext = conversationHistory.length > 0
-    ? conversationHistory.map(msg => 
+    ? conversationHistory.map(msg =>
         `${msg.role === 'user' ? 'Customer' : 'Assistant'}: ${msg.content}`
       ).join('\n')
     : '';
@@ -29,31 +29,50 @@ ${historyContext ? `CONVERSATION HISTORY:\n${historyContext}\n` : ''}
 CURRENT CUSTOMER QUESTION:
 ${message}
 
-INSTRUCTIONS:
-- Answer ONLY using the business knowledge base provided above
-- Be friendly, professional, and concise
-- If the answer is not in the knowledge base, politely say: "I don't have that information in our knowledge base. Let me connect you with a human agent who can help."
-- Do not make up or assume information
-- Stay on topic and helpful
+IMPORTANT:
+Return your response strictly in JSON format like this:
+
+{
+  "answer": "your answer here",
+  "confidence": 0.0 to 1.0
+}
+
+RULES:
+- Answer ONLY using the business knowledge base
+- If answer is not in knowledge base, say:
+  "I don't have that information in our knowledge base. Let me connect you with a human agent who can help."
+- Set confidence low (0.2–0.5) if unsure
+- Set confidence high (0.7–1.0) if confident
+- Do NOT return anything outside JSON
 `;
 
   console.log("Gemini prompt:\n", prompt);
 
   try {
     const result = await model.generateContent(prompt);
-    const response = result.response.text();
-    
-    console.log("Gemini response:", response);
-    
-    return response;
+    const rawText = result.response.text();
+
+    console.log("Gemini raw response:", rawText);
+
+    // Try parsing JSON safely
+    try {
+      const parsed = JSON.parse(rawText);
+      return parsed;
+    } catch {
+      // Fallback if Gemini doesn't return clean JSON
+      return {
+        answer: rawText,
+        confidence: 0.5
+      };
+    }
+
   } catch (error) {
     console.error("Error generating AI reply:", error);
-    
-    // Handle rate limiting
+
     if (error.status === 429) {
       throw new Error("Rate limit exceeded. Please try again in a moment.");
     }
-    
+
     throw new Error(`AI generation failed: ${error.message}`);
   }
 };
