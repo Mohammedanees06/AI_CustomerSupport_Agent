@@ -9,7 +9,9 @@ import { getAIReply } from "../services/ai/ai.service.js";
 import { createEmbedding } from "../services/ai/embedding.service.js";
 import { findRelevantKnowledge } from "../services/ai/rag.service.js";
 import { incrementMetric } from "../services/analytics.service.js";
-import { aiQueue } from "../queue/ai.queue.js";
+import { aiQueue } from "../services/queue/ai.queue.js";
+
+
 
 /**
  * ==========================================================

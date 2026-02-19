@@ -31,9 +31,7 @@ const worker = new Worker(
   async (job) => {
     const { message, businessId } = job.data;
 
-    // ======================================================
-    // 1️⃣ SAVE USER MESSAGE
-    // ======================================================
+    // SAVE USER MESSAGE
     const userMsg = await Message.create({
       business: businessId,
       sender: "user",
@@ -45,9 +43,7 @@ const worker = new Worker(
     const io = getIO();
     io.to(businessId.toString()).emit("new-message", userMsg);
 
-    // ======================================================
-    // 2️⃣ ORDER DETECTION (Structured Query)
-    // ======================================================
+    // ORDER DETECTION (Structured Query)
     const orderMatch = message.match(/order\s*#?(\w+)/i);
 
     if (orderMatch) {
@@ -77,23 +73,17 @@ Tracking number: ${order.trackingNumber || "Not available yet"}.`;
       }
     }
 
-    // ======================================================
-    // 3️⃣ RAG KNOWLEDGE LOOKUP
-    // ======================================================
+    //  RAG KNOWLEDGE LOOKUP
     const queryEmbedding = await createEmbedding(message);
     const context = await findRelevantKnowledge(businessId, queryEmbedding);
 
-    // ======================================================
-    // 4️⃣ AI GENERATION WITH CONFIDENCE
-    // ======================================================
+    //  AI GENERATION WITH CONFIDENCE
     const aiResult = await getAIReply(message, context);
 
     let finalAiReply = aiResult.answer;
     const confidence = aiResult.confidence ?? 0.5;
 
-    // ======================================================
-    // 5️⃣ CONFIDENCE-BASED ESCALATION
-    // ======================================================
+    // CONFIDENCE-BASED ESCALATION
     if (confidence < 0.6) {
       await Ticket.create({
         business: businessId,
@@ -106,9 +96,7 @@ Tracking number: ${order.trackingNumber || "Not available yet"}.`;
         "\n\nI've also opened a support ticket so a human agent can assist you if needed.";
     }
 
-    // ======================================================
-    // 6️⃣ SAVE AI MESSAGE
-    // ======================================================
+    // SAVE AI MESSAGE
     const aiMsg = await Message.create({
       business: businessId,
       sender: "ai",
@@ -117,9 +105,7 @@ Tracking number: ${order.trackingNumber || "Not available yet"}.`;
 
     await incrementMetric(businessId, "totalAIResponses");
 
-    // ======================================================
-    // 7️⃣ REAL-TIME SOCKET UPDATE
-    // ======================================================
+    //  REAL-TIME SOCKET UPDATE
     io.to(businessId.toString()).emit("new-message", aiMsg);
   },
   {
@@ -128,9 +114,7 @@ Tracking number: ${order.trackingNumber || "Not available yet"}.`;
   }
 );
 
-// ============================================================
-// FAILURE HANDLING
-// ============================================================
+//  FAILURE HANDLING
 worker.on("failed", (job, err) => {
   console.error(`Job ${job.id} failed:`, err.message);
 });

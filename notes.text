@@ -335,3 +335,138 @@ Command we used:
 docker run -d -p 6379:6379 redis
 
 USER FLOW: User → Browser → Backend → Redis → Backend → User
+
+
+Twilio
+Voice Architecture (Simple View)
+Phone Call
+   ↓
+Webhook (Twilio)
+   ↓
+Speech-to-Text
+   ↓
+Queue → Worker → AI
+   ↓
+Text-to-Speech
+   ↓
+Return audio to caller
+
+Twilio and Ngrok
+
+---
+
+## 🎯 What Are We Trying To Do?
+
+We want this:
+
+> 📞 When someone calls your Twilio number → your AI should answer.
+
+That’s the goal.
+
+---
+
+## 🧠 Problem
+
+Your AI server is running here:
+
+```
+http://localhost:5000
+```
+
+But:
+
+❌ “localhost” means **only your laptop can see it**
+❌ Twilio is on the internet
+❌ Twilio cannot see your laptop
+
+So when someone calls, Twilio doesn’t know where to send the call data.
+
+---
+
+## 🟢 What Twilio Does
+
+Twilio gives you:
+
+* A real phone number
+* When someone calls:
+
+  * Twilio sends a request (webhook) to a URL you give it
+
+Example:
+
+```
+https://yourdomain.com/api/voice/call
+```
+
+But you don’t have a public domain yet.
+
+---
+
+## 🔵 What ngrok Does
+
+ngrok creates a public URL that points to your laptop.
+
+When you run:
+
+```
+ngrok http 5000
+```
+
+It creates something like:
+
+```
+https://abcd.ngrok-free.app
+```
+
+Now:
+
+```
+Internet → abcd.ngrok-free.app → your laptop (port 5000)
+```
+
+So Twilio can now reach your AI.
+
+---
+
+## 🔁 Full Flow (Very Simple)
+
+1️⃣ Someone calls your Twilio number
+2️⃣ Twilio sends call info to:
+
+```
+https://abcd.ngrok-free.app/api/voice/call
+```
+
+3️⃣ ngrok sends that to:
+
+```
+http://localhost:5000/api/voice/call
+```
+
+4️⃣ Your AI processes it
+5️⃣ Twilio reads the AI reply out loud
+
+---
+
+## 🔥 Why Both Needed?
+
+| Tool   | Why                                |
+| ------ | ---------------------------------- |
+| Twilio | Gives phone number + handles voice |
+| ngrok  | Makes your local server public     |
+
+Without ngrok → Twilio cannot reach your AI.
+
+Without Twilio → No phone number.
+
+---
+
+Twilio gives you a real phone number.
+
+When someone calls it, Twilio needs a public URL to send the call data to.
+
+Your AI is running on localhost (only your laptop), so Twilio can’t reach it.
+
+ngrok gives your laptop a temporary public link.
+
+

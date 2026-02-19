@@ -13,6 +13,8 @@ import "./config/redis.js";
 import knowledgeRoutes from "./routes/knowledge.routes.js";
 import ticketRoutes from "./routes/ticket.routes.js";
 import orderRoutes from "./routes/order.routes.js";
+import monitorRoutes from "./routes/monitor.routes.js";
+import voiceRoutes from "./routes/voice.routes.js";
 
 
 
@@ -24,6 +26,10 @@ app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(passport.initialize());
 
+app.get("/", (req, res) => {
+  res.json({ status: "ok", message: "Server is running" });
+});
+
 // app.use routes should generally come before starting the server
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
@@ -31,7 +37,8 @@ app.use("/api/business", businessRoutes);
 app.use("/api/knowledge", knowledgeRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/orders", orderRoutes);
-
+app.use("/api/monitor", monitorRoutes);
+app.use("/api/voice", voiceRoutes);
 
 // 1. Assign the result of app.listen to 'server'
 const server = app.listen(process.env.PORT, () =>
