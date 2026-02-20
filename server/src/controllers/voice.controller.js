@@ -5,6 +5,9 @@ import { getAIReply } from "../services/ai/ai.service.js";
  * 1️⃣ Handles incoming phone call
  */
 export const handleIncomingCall = async (req, res) => {
+  console.log("✅ handleIncomingCall hit!");
+  console.log("Body:", req.body);
+  
   const twiml = new twilio.twiml.VoiceResponse();
 
   twiml.say(
@@ -22,7 +25,6 @@ export const handleIncomingCall = async (req, res) => {
   res.type("text/xml");
   res.send(twiml.toString());
 };
-
 /**
  * 2️⃣ Processes the speech from caller
  */
