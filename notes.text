@@ -462,11 +462,98 @@ Without Twilio → No phone number.
 ---
 
 Twilio gives you a real phone number.
-
 When someone calls it, Twilio needs a public URL to send the call data to.
-
 Your AI is running on localhost (only your laptop), so Twilio can’t reach it.
-
 ngrok gives your laptop a temporary public link.
 
 
+Role of ngrok
+
+Your AI server is running here:
+http://localhost:5000
+
+But:
+❌ Twilio (on the internet)
+cannot access localhost
+
+Because localhost = only your laptop
+
+What ngrok does
+
+When you run:
+ngrok http 5000
+
+ngrok creates a public internet link like:
+https://abc.ngrok-free.dev
+
+Now this happens:
+Twilio sends the call data to your public ngrok URL over the internet.
+ngrok receives it and forwards that request to your local server running on localhost:5000.
+Twilio → https://abc.ngrok-free.dev → localhost:5000
+
+So ngrok is just a:
+Bridge between Twilio (internet) and your local AI server
+
+
+Step by step when you call the number::
+
+---
+**Step 1 — You call the number**
+You dial `+1 213 370 1583` from your phone. This number belongs to Twilio (like a Jio/Airtel number).
+---
+**Step 2 — Twilio receives your call**
+Twilio picks up and thinks:
+> "Someone called me, let me check what I should do"
+It checks its settings and sees your ngrok URL:
+```
+https://subepiglottic-nonrousing-elbert.ngrok-free.dev/api/voice/call
+```
+---
+Step 3 — Twilio contacts your server**
+Twilio sends a message (POST request) to your ngrok URL saying:
+> "Hey server! Someone called from +917022544934, what should I do?"
+
+Step 4 — Ngrok forwards to your laptop**
+Your server is running on your laptop (`localhost:3000`). The internet can't reach your laptop directly. 
+So ngrok forwards Twilio's message to your laptop.`
+Twilio → Ngrok → Your Laptop
+
+Step 5 — Your server responds**
+Your `handleIncomingCall` runs and sends back TwiML (instructions) to Twilio:
+"Say this to the caller: Hello! Welcome to AI Customer Support..."
+"Then listen to what they say"
+
+Step 6 — Twilio speaks to you**
+Twilio follows the instructions and you hear on your phone:
+> *"Hello! Welcome to AI Customer Support. Please tell me how I can help you."*
+
+Step 7 — You speak**
+You say something like:
+> *"I want to track my order"*
+Twilio listens and converts your voice to text:
+SpeechResult = "I want to track my order"
+
+Step 8 — Twilio sends your speech to server**
+Twilio again contacts your server at `/api/voice/process` with your speech text.
+
+Step 9 — AI processes your speech**
+Your `processSpeech` controller sends the text to your AI service. AI generates a reply:
+"Your order is out for delivery and will arrive by 5pm"
+
+Step 10 — You hear the AI reply**
+Server sends TwiML back to Twilio → Twilio speaks the AI answer → You hear it on your phone! 🎉
+
+
+You call +1 213 370 1583
+        ↓
+Twilio picks up the call
+        ↓
+Twilio asks your server "what should I say?"
+        ↓
+Ngrok lets Twilio reach your laptop
+        ↓
+Your server says "say this: Hello Welcome..."
+        ↓
+Twilio speaks it to you
+        ↓
+You reply → AI processes → Twilio speaks AI answer
