@@ -1,6 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export const getAIReply = async (message, context, conversationHistory = []) => {
+export const getAIReply = async (
+  message,
+  context,
+  conversationHistory = [],
+) => {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY is missing");
   }
@@ -11,12 +15,21 @@ export const getAIReply = async (message, context, conversationHistory = []) => 
     model: "models/gemini-2.5-flash",
   });
 
-  // Build conversation history
-  const historyContext = conversationHistory.length > 0
-    ? conversationHistory.map(msg =>
-        `${msg.role === 'user' ? 'Customer' : 'Assistant'}: ${msg.content}`
-      ).join('\n')
-    : '';
+  // ✅ Build formatted conversation history
+  const formattedHistory =
+    conversationHistory.length > 0
+      ? conversationHistory
+          .map(
+            (msg) =>
+              `${msg.role === "user" ? "Customer" : "Assistant"}: ${msg.content}`,
+          )
+          .join("\n")
+      : "";
+
+  // ✅ If conversationHistory exists, do NOT duplicate message
+  const fullConversation = formattedHistory
+    ? `${formattedHistory}\nCustomer: ${message}`
+    : `Customer: ${message}`;
 
   const prompt = `
 You are a helpful customer support assistant for a business.
@@ -24,10 +37,8 @@ You are a helpful customer support assistant for a business.
 BUSINESS KNOWLEDGE BASE:
 ${context || "No business information available."}
 
-${historyContext ? `CONVERSATION HISTORY:\n${historyContext}\n` : ''}
-
-CURRENT CUSTOMER QUESTION:
-${message}
+CONVERSATION:
+${fullConversation}
 
 IMPORTANT:
 Return your response strictly in JSON format like this:
@@ -54,18 +65,21 @@ RULES:
 
     console.log("Gemini raw response:", rawText);
 
-    // Try parsing JSON safely
     try {
-      const parsed = JSON.parse(rawText);
+      // Removes markdown formatting if Gemini adds it
+      let cleaned = rawText
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      const parsed = JSON.parse(cleaned);
       return parsed;
     } catch {
-      // Fallback if Gemini doesn't return clean JSON
       return {
         answer: rawText,
-        confidence: 0.5
+        confidence: 0.5,
       };
     }
-
   } catch (error) {
     console.error("Error generating AI reply:", error);
 
