@@ -557,3 +557,39 @@ Your server says "say this: Hello Welcome..."
 Twilio speaks it to you
         ↓
 You reply → AI processes → Twilio speaks AI answer
+
+
+The Problem:
+
+The code is currently locked to one specific business ID.
+If a new company joins our platform, the AI will still answer their phone calls using the first company's data.
+
+The Solution
+We need to make the code check which phone number was dialed so it can use the right company's data.
+Step 1: Add a "phone number" field to our database rules.
+Step 2: Save the actual Twilio phone number into our database.
+Step 3: Update the code so that when a call comes in, it looks up the dialed number, finds the matching company, and uses the correct AI knowledge to reply.
+
+Here is the step-by-step flow of exactly what happens with this model after a company logs into your website.
+
+### **1. The Company Logs In**
+A business owner signs into our platform's frontend dashboard.
+
+### **2. They Add Their Phone Number**
+On their dashboard settings, they type in the Twilio phone number they want to use for their AI voice assistant.
+
+### **3. The Database Saves It**
+
+Our website sends that phone number to our backend. Because we just added `twilioNumber` to our model, our database now has a place to save it. It saves a document that looks like this:
+
+* **Name:** "Mary's Bakery"
+* **Owner:** (Mary's User ID)
+* **twilioNumber:** "+15551234"
+
+### **4. A Customer Calls**
+Later, a customer dials `+15551234`. Twilio sends a message to your code saying, "Hey, someone is calling +15551234."
+
+### **5. The AI Makes the Match**
+The code searches our database for the number `+15551234`. It instantly finds Mary's Bakery, loads her specific AI knowledge, and answers the phone using her data.
+
+---

@@ -34,6 +34,8 @@ app.get("/", (req, res) => {
   res.json({ status: "ok", message: "Server is running" });
 });
 
+console.log(process.env.MONGO_URI);
+
 // app.use routes should generally come before starting the server
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
