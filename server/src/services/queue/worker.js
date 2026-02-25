@@ -1,16 +1,18 @@
 import { Worker } from "bullmq";
-import redis from "../config/redis.js";
+import redis from "../../config/redis.js";
 
-import Message from "../models/Message.model.js";
-import Ticket from "../models/Ticket.model.js";
-import Order from "../models/Order.model.js";
+import Message from "../../models/Message.model.js";
+import Ticket from "../../models/Ticket.model.js";
+import Order from "../../models/Order.model.js";
 
-import { getAIReply } from "../services/ai/ai.service.js";
-import { createEmbedding } from "../services/ai/embedding.service.js";
-import { findRelevantKnowledge } from "../services/ai/rag.service.js";
-import { incrementMetric } from "../services/analytics.service.js";
-import { getIO } from "../config/socket.js";
+import { getAIReply } from "../ai/ai.service.js";
+import { createEmbedding } from "../ai/embedding.service.js";
+import { findRelevantKnowledge } from "../ai/rag.service.js";
+import { incrementMetric } from "../analytics.service.js";
 
+import { getIO } from "../../config/socket.js";
+import dotenv from "dotenv";
+dotenv.config();
 /**
  * ============================================================
  * AI WORKER
@@ -26,97 +28,118 @@ import { getIO } from "../config/socket.js";
  * ============================================================
  */
 
+console.log("Worker file loaded");
 const worker = new Worker(
   "ai-processing",
   async (job) => {
-    const { message, businessId } = job.data;
 
-    // SAVE USER MESSAGE
-    const userMsg = await Message.create({
-      business: businessId,
-      sender: "user",
-      content: message
-    });
+    const { type } = job.data;
 
-    await incrementMetric(businessId, "totalMessages");
+    // ============================================
+    // 1️⃣ CHAT FLOW 
+    // ============================================
+    if (!type || type === "chat") {
 
-    const io = getIO();
-    io.to(businessId.toString()).emit("new-message", userMsg);
+      const { message, businessId } = job.data;
 
-    // ORDER DETECTION (Structured Query)
-    const orderMatch = message.match(/order\s*#?(\w+)/i);
-
-    if (orderMatch) {
-      const orderNumber = orderMatch[1];
-
-      const order = await Order.findOne({
+      // SAVE USER MESSAGE
+      const userMsg = await Message.create({
         business: businessId,
-        orderNumber
+        sender: "user",
+        content: message
       });
 
-      if (order) {
-        const reply = `Your order #${order.orderNumber} is currently ${order.status}.
-Tracking number: ${order.trackingNumber || "Not available yet"}.`;
+      await incrementMetric(businessId, "totalMessages");
 
-        const aiMsg = await Message.create({
+      const io = getIO();
+      io.to(businessId.toString()).emit("new-message", userMsg);
+
+      // ORDER DETECTION
+      const orderMatch = message.match(/order\s*#?(\w+)/i);
+
+      if (orderMatch) {
+        const orderNumber = orderMatch[1];
+
+        const order = await Order.findOne({
           business: businessId,
-          sender: "ai",
-          content: reply
+          orderNumber
         });
 
-        await incrementMetric(businessId, "totalOrderLookups");
-        await incrementMetric(businessId, "totalAIResponses");
+        if (order) {
+          const reply = `Your order #${order.orderNumber} is currently ${order.status}.
+Tracking number: ${order.trackingNumber || "Not available yet"}.`;
 
-        io.to(businessId.toString()).emit("new-message", aiMsg);
+          const aiMsg = await Message.create({
+            business: businessId,
+            sender: "ai",
+            content: reply
+          });
 
-        return; // Stop further AI processing
+          await incrementMetric(businessId, "totalOrderLookups");
+          await incrementMetric(businessId, "totalAIResponses");
+
+          io.to(businessId.toString()).emit("new-message", aiMsg);
+
+          return;
+        }
       }
-    }
 
-    //  RAG KNOWLEDGE LOOKUP
-    const queryEmbedding = await createEmbedding(message);
-    const context = await findRelevantKnowledge(businessId, queryEmbedding);
+      // RAG
+      const queryEmbedding = await createEmbedding(message);
+      const context = await findRelevantKnowledge(businessId, queryEmbedding);
 
-    //  AI GENERATION WITH CONFIDENCE
-    const aiResult = await getAIReply(message, context);
+      // AI
+      const aiResult = await getAIReply(message, context);
 
-    let finalAiReply = aiResult.answer;
-    const confidence = aiResult.confidence ?? 0.5;
+      let finalAiReply = aiResult.answer;
+      const confidence = aiResult.confidence ?? 0.5;
 
-    // CONFIDENCE-BASED ESCALATION
-    if (confidence < 0.6) {
-      await Ticket.create({
+      if (confidence < 0.6) {
+        await Ticket.create({
+          business: businessId,
+          customerMessage: message
+        });
+
+        await incrementMetric(businessId, "totalTicketsCreated");
+
+        finalAiReply +=
+          "\n\nI've also opened a support ticket so a human agent can assist you if needed.";
+      }
+
+      const aiMsg = await Message.create({
         business: businessId,
-        customerMessage: message
+        sender: "ai",
+        content: finalAiReply
       });
 
-      await incrementMetric(businessId, "totalTicketsCreated");
+      await incrementMetric(businessId, "totalAIResponses");
 
-      finalAiReply +=
-        "\n\nI've also opened a support ticket so a human agent can assist you if needed.";
+      io.to(businessId.toString()).emit("new-message", aiMsg);
+
+      return;
     }
 
-    // SAVE AI MESSAGE
-    const aiMsg = await Message.create({
-      business: businessId,
-      sender: "ai",
-      content: finalAiReply
-    });
+    // ============================================
+    // 2️⃣ VOICE FLOW 
+    // ============================================
+    if (type === "voice") {
 
-    await incrementMetric(businessId, "totalAIResponses");
+      const { message, context, history } = job.data;
 
-    //  REAL-TIME SOCKET UPDATE
-    io.to(businessId.toString()).emit("new-message", aiMsg);
+      const aiResult = await getAIReply(
+        message,
+        context,
+        history
+      );
+
+      return aiResult; // IMPORTANT for waitUntilFinished
+    }
+
   },
   {
     connection: redis,
-    concurrency: 5 // 🔥 Limit AI processing concurrency
+    concurrency: 5
   }
+  
 );
-
-//  FAILURE HANDLING
-worker.on("failed", (job, err) => {
-  console.error(`Job ${job.id} failed:`, err.message);
-});
-
-console.log("AI Worker started");
+console.log(" AI Worker started");

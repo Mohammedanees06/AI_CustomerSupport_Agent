@@ -49,12 +49,14 @@ Return your response strictly in JSON format like this:
 }
 
 RULES:
-- Answer ONLY using the business knowledge base
-- If answer is not in knowledge base, say:
+- If the customer greets (hello, hi) or ends the conversation (bye, thank you, thanks), respond politely and naturally.
+- For business-related questions, answer ONLY using the business knowledge base.
+- If a business-related answer is not in the knowledge base, say:
   "I don't have that information in our knowledge base. Let me connect you with a human agent who can help."
-- Set confidence low (0.2–0.5) if unsure
-- Set confidence high (0.7–1.0) if confident
-- Do NOT return anything outside JSON
+- Keep greetings and closing responses short and friendly.
+- Set confidence low (0.2–0.5) if unsure.
+- Set confidence high (0.7–1.0) if confident.
+- Do NOT return anything outside JSON.
 `;
 
   console.log("Gemini prompt:\n", prompt);

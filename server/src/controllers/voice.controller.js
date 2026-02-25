@@ -1,23 +1,21 @@
 import twilio from "twilio";
 import Business from "../models/Business.model.js";
-
-import { getAIReply } from "../services/ai/ai.service.js";
 import { createEmbedding } from "../services/ai/embedding.service.js";
 import { findRelevantKnowledge } from "../services/ai/rag.service.js";
 import redis from "../config/redis.js";
 
-/**
- * ============================================
- * CONFIG
- * ============================================
- */
+import { Queue, QueueEvents } from "bullmq";
+
+// CONFIG
 const BASE_URL =
   "https://subepiglottic-nonrousing-elbert.ngrok-free.dev";
 
+// IMPORTANT: Queue name MUST match worker
+const aiQueue = new Queue("ai-processing", { connection: redis });
+const queueEvents = new QueueEvents("ai-processing", { connection: redis });
+
 /**
- * ============================================
  * 1️⃣ Handle Incoming Call
- * ============================================
  */
 export const handleIncomingCall = async (req, res) => {
   console.log("📞 Incoming call webhook hit");
@@ -40,9 +38,7 @@ export const handleIncomingCall = async (req, res) => {
 };
 
 /**
- * ============================================
  * 2️⃣ Process Caller Speech
- * ============================================
  */
 export const processSpeech = async (req, res) => {
   try {
@@ -58,12 +54,8 @@ export const processSpeech = async (req, res) => {
 
     const memoryKey = `voice:call:${callSid}`;
 
-    console.log("Caller said:", userSpeech);
-    console.log("Twilio number:", twilioNumber);
-
     const twiml = new twilio.twiml.VoiceResponse();
 
-    // 🔁 If speech not detected
     if (!userSpeech) {
       twiml.say("Sorry, I did not catch that. Please try again.");
 
@@ -88,12 +80,11 @@ export const processSpeech = async (req, res) => {
     }
 
     /**
-     * 2️⃣ Load Conversation Memory
+     * 2️⃣ Load Memory
      */
     let history = await redis.get(memoryKey);
     history = history ? JSON.parse(history) : [];
 
-    // Add current user message
     history.push({
       role: "user",
       content: userSpeech,
@@ -103,26 +94,24 @@ export const processSpeech = async (req, res) => {
      * 3️⃣ RAG
      */
     const queryEmbedding = await createEmbedding(userSpeech);
-
     const context = await findRelevantKnowledge(
       business._id,
       queryEmbedding
     );
 
-    /**
-     * 4️⃣ AI
-     * Pass:
-     * - current userSpeech
-     * - context
-     * - previous history (excluding latest message)
-     */
     const previousHistory = history.slice(0, -1);
 
-    const aiResult = await getAIReply(
-      userSpeech,
+    /**
+     * 4️⃣ PUSH TO QUEUE (VOICE JOB)
+     */
+    const job = await aiQueue.add("voice-job", {
+      type: "voice",
+      message: userSpeech,
       context,
-      previousHistory
-    );
+      history: previousHistory,
+    });
+
+    const aiResult = await job.waitUntilFinished(queueEvents);
 
     let answer = aiResult.answer;
     const confidence = aiResult.confidence ?? 0.5;
@@ -133,7 +122,7 @@ export const processSpeech = async (req, res) => {
     }
 
     /**
-     * 5️⃣ Save Updated History
+     * 5️⃣ Save Memory
      */
     history.push({
       role: "assistant",
@@ -141,10 +130,10 @@ export const processSpeech = async (req, res) => {
     });
 
     await redis.set(memoryKey, JSON.stringify(history));
-    await redis.expire(memoryKey, 1800); // 30 minutes TTL
+    await redis.expire(memoryKey, 1800);
 
     /**
-     * 6️⃣ Respond + Gather Again
+     * 6️⃣ Respond
      */
     twiml.say(answer);
 
