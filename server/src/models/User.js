@@ -10,6 +10,10 @@ const UserSchema = new mongoose.Schema(
   type: String,
   enum: ["owner", "staff"],
   default: "owner"
+},
+business: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Business"
 }
 
   },

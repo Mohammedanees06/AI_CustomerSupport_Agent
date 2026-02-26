@@ -1,15 +1,27 @@
 import jwt from "jsonwebtoken";
 
 export const googleCallback = (req, res) => {
-  const user = req.user;
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is missing");
+  }
+
+  if (!req.user) {
+    return res.status(401).json({ message: "Google authentication failed" });
+  }
 
   const token = jwt.sign(
-    { userId: user._id, role: user.role },
+    {
+      userId: req.user._id,
+      role: req.user.role || "business"
+    },
     process.env.JWT_SECRET,
     { expiresIn: "1d" }
   );
 
-  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+  const clientUrl =
+    process.env.CLIENT_URL || "http://localhost:5173";
 
-  res.redirect(`${clientUrl}/auth/google/success?token=${token}`);
+  res.redirect(
+    `${clientUrl}/auth/google/success?token=${token}`
+  );
 };
