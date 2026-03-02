@@ -595,9 +595,19 @@ The code searches our database for the number `+15551234`. It instantly finds Ma
 ---
 
 Async Thunk :
+A thunk is just: A function that returns another function.
 
-Think of an **Async Thunk** as a "middleman" that allows Redux to handle tasks that take time, like fetching data from a website.
-Normally, Redux is **instant**. You click a button, and the state changes immediately. But APIs are **slow**. An Async Thunk sits in between the click and the state change to manage that waiting period.
+An async thunk (specifically createAsyncThunk in Redux Toolkit) is a tool that allows you to write asynchronous logic that interacts with your Redux store.
+
+In standard Redux, reducers must be entirely synchronous and "pure"—they take the current state and an action,
+and immediately return a new state. They cannot make API calls, wait for promises, or handle side effects. 
+An async thunk acts as a middleware that bridges this gap, allowing you to fetch data from your backend and
+update your frontend state accordingly.
+
+Think of an **Async Thunk** as a "middleman" that allows Redux to handle tasks that take time, 
+like fetching data from a website.
+Normally, Redux is **instant**. You click a button, and the state changes immediately. But APIs are **slow**.
+An Async Thunk sits in between the click and the state change to manage that waiting period.
 
 ### The 3 Stages it Handles:
 
@@ -607,7 +617,8 @@ Normally, Redux is **instant**. You click a button, and the state changes immedi
 
 ### In Short:
 
-It's a way to keep your **API logic** out of your UI components and give Redux a way to track **loading**, **success**, and **failure** states automatically.
+It's a way to keep your **API logic** out of your UI components and give Redux a way to track 
+**loading**, **success**, and **failure** states automatically.
 
 
 RTK Query :
@@ -698,3 +709,27 @@ Fetch and Axios are just tools to send requests to the server and get data back 
 Async Thunk and RTK Query help Redux manage what happens during that request — like loading, success, error, and storing data.
 Fetch/Axios = “How we talk to the server.”
 Async Thunk/RTK Query = “How we manage and store the server response in our app.”
+
+
+What Is ProtectedRoute?
+It checks authentication.It decides allow or redirect.It does NOT define routes.
+
+What Does routes.jsx Do?
+routes.jsx defines: What URLs exist, What component loads for each URL,Which routes are public,
+Which routes are protected.
+
+Authentication vs Authorization
+
+Authentication:
+User logs in
+Backend verifies password
+Backend generates JWT
+
+Authorization:
+Backend checks JWT.Backend checks role (owner/staff)
+
+Backend decides:
+Can access dashboard? Can create business? Can view analytics?
+
+Authentication = identity check
+Authorization = access control

@@ -1,15 +1,26 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../features/auth/auth.thunks";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { loading, error, token } = useSelector(
+    (state) => state.auth
+  );
 
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [token, navigate]);
 
   const handleChange = (e) => {
     setForm({
@@ -21,6 +32,11 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(loginUser(form));
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href =
+      "http://localhost:5000/api/auth/google";
   };
 
   return (
@@ -51,17 +67,40 @@ export default function Login() {
             required
           />
 
+          {error && (
+            <p className="text-red-500 text-sm">{error}</p>
+          )}
+
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-60"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
+        <div className="my-6 flex items-center">
+          <div className="flex-grow border-t"></div>
+          <span className="mx-4 text-gray-500 text-sm">
+            OR
+          </span>
+          <div className="flex-grow border-t"></div>
+        </div>
+
+        <button
+          onClick={handleGoogleLogin}
+          className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition duration-200"
+        >
+          Continue with Google
+        </button>
+
         <p className="text-sm text-gray-600 text-center mt-6">
           Don’t have an account?{" "}
-          <Link to="/register" className="text-blue-600 font-medium hover:underline">
+          <Link
+            to="/register"
+            className="text-blue-600 font-medium hover:underline"
+          >
             Register
           </Link>
         </p>

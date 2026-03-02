@@ -12,7 +12,7 @@ export const googleCallback = (req, res) => {
   const token = jwt.sign(
     {
       userId: req.user._id,
-      role: req.user.role || "business"
+     role: req.user.role
     },
     process.env.JWT_SECRET,
     { expiresIn: "1d" }

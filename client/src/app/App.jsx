@@ -1,6 +1,62 @@
-import { RouterProvider } from "react-router-dom";
-import router from "./routes";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSuccess, logout } from "../store/auth.slice";
+import AppRoutes from "./routes";
+import { setBusiness } from "../store/business.slice";
+import apiClient from "../services/apiClient";
+import {Loader} from "../components/common/Loader";
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  const dispatch = useDispatch();
+
+  // initialized = tells app whether auth check is finished
+  const { initialized } = useSelector((state) => state.auth);
+
+  // ✅ global api loading state
+  const { loading } = useSelector((state) => state.app);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      dispatch(logout());
+      return;
+    }
+
+   apiClient.get("/auth/me")
+      .then(async (res) => {
+        dispatch(
+          loginSuccess({
+            user: res.data.user,
+            token,
+          }),
+        );
+
+        try {
+          const businessRes = await apiClient.get("/business/me");
+          dispatch(setBusiness(businessRes.data));
+        } catch (err) {
+          // ignore if business not created yet
+          if (err.response?.status !== 404) {
+            console.error(err);
+          }
+        }
+      })
+      .catch(() => {
+        dispatch(logout());
+      });
+  }, [dispatch]);
+
+  if (!initialized) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* ✅ GLOBAL LOADER */}
+      {loading && <Loader />}
+
+      <AppRoutes />
+    </div>
+  );
 }

@@ -1,16 +1,27 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../features/auth/auth.thunks";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Register() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { loading, error, token } = useSelector(
+    (state) => state.auth
+  );
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [token, navigate]);
 
   const handleChange = (e) => {
     setForm({
@@ -22,6 +33,11 @@ export default function Register() {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(registerUser(form));
+  };
+
+  const handleGoogleRegister = () => {
+    window.location.href =
+      "http://localhost:5000/api/auth/google";
   };
 
   return (
@@ -62,17 +78,40 @@ export default function Register() {
             required
           />
 
+          {error && (
+            <p className="text-red-500 text-sm">{error}</p>
+          )}
+
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition duration-200"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-60"
           >
-            Register
+            {loading ? "Creating account..." : "Register"}
           </button>
         </form>
 
+        <div className="my-6 flex items-center">
+          <div className="flex-grow border-t"></div>
+          <span className="mx-4 text-gray-500 text-sm">
+            OR
+          </span>
+          <div className="flex-grow border-t"></div>
+        </div>
+
+        <button
+          onClick={handleGoogleRegister}
+          className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition duration-200"
+        >
+          Continue with Google
+        </button>
+
         <p className="text-sm text-gray-600 text-center mt-6">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 font-medium hover:underline">
+          <Link
+            to="/login"
+            className="text-blue-600 font-medium hover:underline"
+          >
             Login
           </Link>
         </p>

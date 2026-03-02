@@ -103,3 +103,22 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Login failed" });
   }
 };
+
+
+/**
+ * GET CURRENT USER
+ * Route: GET /api/auth/me
+ * Access: Private
+ */
+export const getCurrentUser = async (req, res) => {
+  try {
+    // req.user is attached by authMiddleware
+    res.status(200).json({
+      user: req.user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch user",
+    });
+  }
+};
