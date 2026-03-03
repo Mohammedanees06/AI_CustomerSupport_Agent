@@ -27,6 +27,7 @@ export default function ChatPage() {
    */
   useEffect(() => {
     if (!businessId) return;
+    console.log("Fetching conversations for businessId:", businessId);
 
     axios.get(`/chat/conversations/${businessId}`)
       .then((res) => {
@@ -37,7 +38,10 @@ export default function ChatPage() {
           dispatch(setActiveConversation(res.data[0]._id));
         }
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+  console.error("Conversations fetch failed:", err.message);
+  console.error("Full error:", err);
+});
   }, [businessId, dispatch]);
 
   /**

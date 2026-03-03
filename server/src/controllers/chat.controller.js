@@ -311,11 +311,13 @@ export const getChatHistory = async (req, res) => {
 export const getConversations = async (req, res) => {
   try {
     const { businessId } = req.params;
+    console.log("Fetching conversations for:", businessId); // add this
 
     const conversations = await Conversation.find({
-      businessId: businessId,   // MUST match DB field name
+      businessId: businessId,
     }).sort({ updatedAt: -1 });
 
+    console.log("Found:", conversations.length); // add this
     res.json(conversations);
   } catch (error) {
     console.error("Fetch conversations error:", error);

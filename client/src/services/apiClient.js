@@ -13,6 +13,7 @@ const apiClient = axios.create({
 // runs before EVERY api call
 apiClient.interceptors.request.use(
   (config) => {
+     console.log("API REQUEST:", config.method, config.url);
     // ✅ start global loader
     store.dispatch(setLoading(true));
 
