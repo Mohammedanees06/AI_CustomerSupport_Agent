@@ -9,10 +9,7 @@ import {Loader} from "../components/common/Loader";
 export default function App() {
   const dispatch = useDispatch();
 
-  // initialized = tells app whether auth check is finished
   const { initialized } = useSelector((state) => state.auth);
-
-  // ✅ global api loading state
   const { loading } = useSelector((state) => state.app);
 
   useEffect(() => {
@@ -23,7 +20,7 @@ export default function App() {
       return;
     }
 
-   apiClient.get("/auth/me")
+    apiClient.get("/auth/me")  
       .then(async (res) => {
         dispatch(
           loginSuccess({
@@ -33,10 +30,9 @@ export default function App() {
         );
 
         try {
-          const businessRes = await apiClient.get("/business/me");
+          const businessRes = await apiClient.get("/business/my"); 
           dispatch(setBusiness(businessRes.data));
         } catch (err) {
-          // ignore if business not created yet
           if (err.response?.status !== 404) {
             console.error(err);
           }
@@ -53,9 +49,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* ✅ GLOBAL LOADER */}
       {loading && <Loader />}
-
       <AppRoutes />
     </div>
   );

@@ -2,19 +2,27 @@ import mongoose from "mongoose";
 
 const MessageSchema = new mongoose.Schema(
   {
-    business: {
+    conversation: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Business",
-      required: true
+      ref: "Conversation",
+      required: true,
+      index: true
     },
+
     sender: {
       type: String,
       enum: ["user", "ai"],
       required: true
     },
+
     content: {
       type: String,
       required: true
+    },
+
+    tokensUsed: {
+      type: Number,
+      default: 0
     }
   },
   { timestamps: true }

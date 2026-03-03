@@ -1,81 +1,50 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchMessages, sendMessage } 
-from "@/features/chat/chat.thunks";
-
-
-const initialState = {
-  messages: [],
-  activeConversationId: null,
-  unreadCount: 0,
-  loading: false,
-  error: null,
-};
 
 const chatSlice = createSlice({
   name: "chat",
-  initialState,
+  initialState: {
+    conversations: [],
+    activeConversationId: null,
+    messagesByConversation: {}, // { [conversationId]: [] }
+    loading: false,
+  },
   reducers: {
-    setActiveConversation: (state, action) => {
+    setConversations(state, action) {
+      state.conversations = action.payload;
+    },
+
+    setActiveConversation(state, action) {
       state.activeConversationId = action.payload;
     },
 
-    addMessage: (state, action) => {
-      state.messages.push(action.payload);
+    setMessages(state, action) {
+      const { conversationId, messages } = action.payload;
+      state.messagesByConversation[conversationId] = messages;
     },
 
-    clearMessages: (state) => {
-      state.messages = [];
+    addMessage(state, action) {
+      const message = action.payload;
+      const conversationId = message.conversation;
+
+      if (!state.messagesByConversation[conversationId]) {
+        state.messagesByConversation[conversationId] = [];
+      }
+
+      state.messagesByConversation[conversationId].push(message);
     },
 
-    incrementUnread: (state) => {
-      state.unreadCount += 1;
+    setChatLoading(state, action) {
+      state.loading = action.payload;
     },
-
-    resetUnread: (state) => {
-      state.unreadCount = 0;
-    },
-  },
-
-  extraReducers: (builder) => {
-    builder
-
-      /* ================= FETCH MESSAGES ================= */
-
-      .addCase(fetchMessages.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchMessages.fulfilled, (state, action) => {
-        state.loading = false;
-        state.messages = action.payload;
-      })
-      .addCase(fetchMessages.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      /* ================= SEND MESSAGE ================= */
-
-      .addCase(sendMessage.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(sendMessage.fulfilled, (state, action) => {
-        state.loading = false;
-        state.messages.push(action.payload);
-      })
-      .addCase(sendMessage.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
   },
 });
 
 export const {
+  setConversations,
   setActiveConversation,
+  setMessages,
   addMessage,
-  clearMessages,
-  incrementUnread,
-  resetUnread,
+  setChatLoading,
 } = chatSlice.actions;
 
-export default chatSlice.reducer;   
+export default chatSlice.reducer;

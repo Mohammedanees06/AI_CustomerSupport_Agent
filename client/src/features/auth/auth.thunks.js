@@ -37,7 +37,7 @@ export const loginUser = (formData) => async (dispatch) => {
 
     // load business if exists
     try {
-      const businessRes = await apiClient.get("/business/me");
+      const businessRes = await apiClient.get("/business/my");
       dispatch(setBusiness(businessRes.data));
     } catch (err) {
       // 404 = onboarding state (no business yet)

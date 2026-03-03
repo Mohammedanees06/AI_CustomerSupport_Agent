@@ -4,19 +4,15 @@ import Business from "../models/Business.model.js";
  * CREATE BUSINESS
  * One user creates one business
  */
+// business.controller.js
 export const createBusiness = async (req, res) => {
   try {
-    console.log("createBusiness called. req.user:", req.user);
-
-    // 1. FIXED: Check for 'userId' instead of '_id'
-    if (!req.user || !req.user.userId) {
+    if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "Unauthorized: User not found" });
     }
 
     const { name } = req.body;
-    
-    // 2. FIXED: Extract the correct property
-    const ownerId = req.user.userId; 
+    const ownerId = req.user._id; 
 
     if (!name) {
       return res.status(400).json({ message: "Business name is required" });
@@ -27,12 +23,9 @@ export const createBusiness = async (req, res) => {
       return res.status(400).json({ message: "User already has a business" });
     }
 
-    const business = await Business.create({
-      name,
-      owner: ownerId 
-    });
-
+    const business = await Business.create({ name, owner: ownerId });
     res.status(201).json(business);
+
   } catch (error) {
     console.error("Create business error:", error);
     res.status(500).json({ message: "Server error" });

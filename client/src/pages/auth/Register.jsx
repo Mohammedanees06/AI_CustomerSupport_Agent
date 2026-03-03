@@ -7,9 +7,8 @@ export default function Register() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { loading, error, token } = useSelector(
-    (state) => state.auth
-  );
+  const { loading, error, token } = useSelector((state) => state.auth);
+  const hasBusiness = useSelector((state) => !!state.business.business); // ✅ stable boolean
 
   const [form, setForm] = useState({
     name: "",
@@ -18,10 +17,9 @@ export default function Register() {
   });
 
   useEffect(() => {
-    if (token) {
-      navigate("/dashboard");
-    }
-  }, [token, navigate]);
+    if (!token) return; // ✅ exit early — not logged in
+    navigate(hasBusiness ? "/dashboard" : "/business-setup", { replace: true }); // ✅ replace prevents back-button loop
+  }, [token, hasBusiness]); // ✅ navigate omitted to prevent loop
 
   const handleChange = (e) => {
     setForm({
@@ -36,8 +34,7 @@ export default function Register() {
   };
 
   const handleGoogleRegister = () => {
-    window.location.href =
-      "http://localhost:5000/api/auth/google";
+    window.location.href = "http://localhost:5000/api/auth/google";
   };
 
   return (
@@ -93,9 +90,7 @@ export default function Register() {
 
         <div className="my-6 flex items-center">
           <div className="flex-grow border-t"></div>
-          <span className="mx-4 text-gray-500 text-sm">
-            OR
-          </span>
+          <span className="mx-4 text-gray-500 text-sm">OR</span>
           <div className="flex-grow border-t"></div>
         </div>
 

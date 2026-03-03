@@ -15,7 +15,6 @@ export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* public routes */}
         <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/login" element={<Login />} />
@@ -40,10 +39,16 @@ export default function AppRoutes() {
           <Route path="chat" element={<ChatPage />} />
         </Route>
 
-        <Route path="/business/setup" element={<BusinessSetup />} />
+        <Route
+          path="/business-setup"
+          element={
+            <ProtectedRoute>
+              <BusinessSetup />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="*" element={<Navigate to="/login" />} />
-
       </Routes>
     </BrowserRouter>
   );

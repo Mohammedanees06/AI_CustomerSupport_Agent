@@ -13,48 +13,38 @@ import { incrementMetric } from "../analytics.service.js";
 import { getIO } from "../../config/socket.js";
 import dotenv from "dotenv";
 dotenv.config();
+
 /**
  * ============================================================
- * AI WORKER
+ * AI WORKER (Conversation-Isolated Version)
  * ============================================================
- * Runs in background.
- * Handles:
- * - Order detection
- * - RAG knowledge lookup
- * - Confidence-based escalation
- * - Ticket creation
- * - Analytics tracking
- * - Real-time socket updates
+ * - Does NOT save user message (controller already did)
+ * - Saves AI message under conversation
+ * - Emits to conversation room
  * ============================================================
  */
 
 console.log("Worker file loaded");
+
 const worker = new Worker(
   "ai-processing",
   async (job) => {
-
     const { type } = job.data;
 
     // ============================================
-    // 1️⃣ CHAT FLOW 
+    // 1️⃣ CHAT FLOW
     // ============================================
     if (!type || type === "chat") {
 
-      const { message, businessId } = job.data;
-
-      // SAVE USER MESSAGE
-      const userMsg = await Message.create({
-        business: businessId,
-        sender: "user",
-        content: message
-      });
-
-      await incrementMetric(businessId, "totalMessages");
+      const { message, businessId, conversationId, cacheKey } = job.data;
 
       const io = getIO();
-      io.to(businessId.toString()).emit("new-message", userMsg);
 
-      // ORDER DETECTION
+      /**
+       * ============================================
+       * ORDER DETECTION
+       * ============================================
+       */
       const orderMatch = message.match(/order\s*#?(\w+)/i);
 
       if (orderMatch) {
@@ -70,7 +60,7 @@ const worker = new Worker(
 Tracking number: ${order.trackingNumber || "Not available yet"}.`;
 
           const aiMsg = await Message.create({
-            business: businessId,
+            conversation: conversationId,
             sender: "ai",
             content: reply
           });
@@ -78,22 +68,37 @@ Tracking number: ${order.trackingNumber || "Not available yet"}.`;
           await incrementMetric(businessId, "totalOrderLookups");
           await incrementMetric(businessId, "totalAIResponses");
 
-          io.to(businessId.toString()).emit("new-message", aiMsg);
+          await redis.set(cacheKey, reply, "EX", 3600);
+
+          io.to(conversationId.toString()).emit("new-message", aiMsg);
 
           return;
         }
       }
 
-      // RAG
+      /**
+       * ============================================
+       * RAG KNOWLEDGE LOOKUP
+       * ============================================
+       */
       const queryEmbedding = await createEmbedding(message);
       const context = await findRelevantKnowledge(businessId, queryEmbedding);
 
-      // AI
+      /**
+       * ============================================
+       * AI GENERATION
+       * ============================================
+       */
       const aiResult = await getAIReply(message, context);
 
       let finalAiReply = aiResult.answer;
       const confidence = aiResult.confidence ?? 0.5;
 
+      /**
+       * ============================================
+       * CONFIDENCE-BASED ESCALATION
+       * ============================================
+       */
       if (confidence < 0.6) {
         await Ticket.create({
           business: businessId,
@@ -107,20 +112,22 @@ Tracking number: ${order.trackingNumber || "Not available yet"}.`;
       }
 
       const aiMsg = await Message.create({
-        business: businessId,
+        conversation: conversationId,
         sender: "ai",
         content: finalAiReply
       });
 
       await incrementMetric(businessId, "totalAIResponses");
 
-      io.to(businessId.toString()).emit("new-message", aiMsg);
+      await redis.set(cacheKey, finalAiReply, "EX", 3600);
+
+      io.to(conversationId.toString()).emit("new-message", aiMsg);
 
       return;
     }
 
     // ============================================
-    // 2️⃣ VOICE FLOW 
+    // 2️⃣ VOICE FLOW (unchanged)
     // ============================================
     if (type === "voice") {
 
@@ -132,14 +139,13 @@ Tracking number: ${order.trackingNumber || "Not available yet"}.`;
         history
       );
 
-      return aiResult; // IMPORTANT for waitUntilFinished
+      return aiResult;
     }
-
   },
   {
     connection: redis,
     concurrency: 5
   }
-  
 );
-console.log(" AI Worker started");
+
+console.log("AI Worker started");

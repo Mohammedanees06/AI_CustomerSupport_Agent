@@ -7,9 +7,8 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { loading, error, token } = useSelector(
-    (state) => state.auth
-  );
+  const { loading, error, token } = useSelector((state) => state.auth);
+  const hasBusiness = useSelector((state) => !!state.business.business);
 
   const [form, setForm] = useState({
     email: "",
@@ -17,10 +16,9 @@ export default function Login() {
   });
 
   useEffect(() => {
-    if (token) {
-      navigate("/dashboard");
-    }
-  }, [token, navigate]);
+    if (!token) return; // ✅ exit early — not logged in
+    navigate(hasBusiness ? "/dashboard" : "/business-setup", { replace: true }); // ✅ replace prevents back-button loop
+  }, [token, hasBusiness]); // ✅ navigate omitted to prevent loop
 
   const handleChange = (e) => {
     setForm({
@@ -35,8 +33,7 @@ export default function Login() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href =
-      "http://localhost:5000/api/auth/google";
+    window.location.href = "http://localhost:5000/api/auth/google";
   };
 
   return (
@@ -82,9 +79,7 @@ export default function Login() {
 
         <div className="my-6 flex items-center">
           <div className="flex-grow border-t"></div>
-          <span className="mx-4 text-gray-500 text-sm">
-            OR
-          </span>
+          <span className="mx-4 text-gray-500 text-sm">OR</span>
           <div className="flex-grow border-t"></div>
         </div>
 
@@ -96,7 +91,7 @@ export default function Login() {
         </button>
 
         <p className="text-sm text-gray-600 text-center mt-6">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <Link
             to="/register"
             className="text-blue-600 font-medium hover:underline"
