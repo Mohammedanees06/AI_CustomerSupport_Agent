@@ -4,6 +4,9 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
 import ChatPage from "../pages/dashboard/ChatPage";
+import TicketsPage from "../pages/dashboard/TicketsPage";
+import AnalyticsPage from "../pages/dashboard/AnalyticsPage";
+import EmbedPage from "../pages/dashboard/EmbedPage";
 import GoogleAuthSuccess from "../pages/auth/GoogleAuthSuccess";
 
 import ProtectedRoute from "../routes/ProtectedRoute";
@@ -15,13 +18,11 @@ export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* public routes */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
 
-        {/* protected dashboard layout */}
         <Route
           path="/dashboard"
           element={
@@ -32,11 +33,12 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         >
-          {/* index page */}
           <Route index element={<Dashboard />} />
-
-          {/* nested pages */}
           <Route path="chat" element={<ChatPage />} />
+          <Route path="tickets" element={<TicketsPage />} />
+          <Route path="knowledge" element={<Dashboard />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="embed" element={<EmbedPage />} />
         </Route>
 
         <Route
@@ -48,7 +50,7 @@ export default function AppRoutes() {
           }
         />
 
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );

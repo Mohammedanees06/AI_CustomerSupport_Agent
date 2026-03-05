@@ -11,7 +11,7 @@ import { createEmbedding } from "../services/ai/embedding.service.js";
 import { findRelevantKnowledge } from "../services/ai/rag.service.js";
 import { incrementMetric } from "../services/analytics.service.js";
 import { aiQueue } from "../services/queue/ai.queue.js";
-
+import mongoose from "mongoose";
 
 /**
  * ==========================================================
@@ -100,9 +100,10 @@ export const sendMessage = async (req, res) => {
      * ==========================================================
      * 4️⃣ ORDER DETECTION (Structured DB Query)
      * If question contains order number → skip AI & RAG
+     * ✅ Fixed regex: [\w-]+ now matches hyphenated IDs like ORD-001
      * ==========================================================
      */
-    const orderMatch = message.match(/order\s*#?(\w+)/i);
+    const orderMatch = message.match(/order\s*#?([\w-]+)/i);
 
     if (orderMatch) {
       const orderNumber = orderMatch[1];
@@ -113,7 +114,7 @@ export const sendMessage = async (req, res) => {
       });
 
       if (order) {
-        const reply = `Your order #${order.orderNumber} is currently ${order.status}.Tracking number: ${order.trackingNumber || "Not available yet"}.`;
+        const reply = `Your order #${order.orderNumber} is currently ${order.status}. Tracking number: ${order.trackingNumber || "Not available yet"}.`;
 
         const aiMsg = await Message.create({
           conversation: conversation._id,
@@ -220,7 +221,7 @@ export const sendMessage = async (req, res) => {
  */
 export const sendMessageAsync = async (req, res) => {
   try {
-    const { message, businessId, conversationId } = req.body;
+    const { message, businessId, conversationId, orderId } = req.body;
 
     if (!message || !businessId) {
       return res
@@ -270,12 +271,20 @@ export const sendMessageAsync = async (req, res) => {
 
     await incrementMetric(businessId, "totalMessages");
 
+    console.log("ADDING JOB TO QUEUE:", {
+      message,
+      businessId,
+      conversationId: conversation._id,
+    });
+
     // Add job to queue
     await aiQueue.add("process-message", {
       message,
       businessId,
       conversationId: conversation._id,
       cacheKey,
+      orderId: orderId || null,
+      
     });
 
     return res.status(202).json({
@@ -311,16 +320,59 @@ export const getChatHistory = async (req, res) => {
 export const getConversations = async (req, res) => {
   try {
     const { businessId } = req.params;
-    console.log("Fetching conversations for:", businessId); // add this
+
+    console.log("Fetching conversations for:", businessId);
 
     const conversations = await Conversation.find({
-      businessId: businessId,
+      businessId: new mongoose.Types.ObjectId(businessId),
     }).sort({ updatedAt: -1 });
 
-    console.log("Found:", conversations.length); // add this
-    res.json(conversations);
+    console.log("Found:", conversations.length);
+
+    // Enrich with last message
+    const enriched = await Promise.all(
+      conversations.map(async (conv) => {
+        const lastMessage = await Message.findOne({ conversation: conv._id })
+          .sort({ createdAt: -1 })
+          .select("content sender createdAt");
+
+        return {
+          ...conv.toObject(),
+          lastMessage: lastMessage || null,
+        };
+      })
+    );
+
+    res.json(enriched);
   } catch (error) {
     console.error("Fetch conversations error:", error);
     res.status(500).json({ message: "Failed to fetch conversations" });
+  }
+};
+
+/**
+ * ==========================================================
+ * CREATE CONVERSATION (Public — for widget customers)
+ * Called by the embeddable widget before sending first message.
+ * customerId = "order:ORD-123" or "anonymous"
+ * ==========================================================
+ */
+export const createConversation = async (req, res) => {
+  try {
+    const { businessId, customerId } = req.body;
+
+    if (!businessId) {
+      return res.status(400).json({ message: "businessId is required" });
+    }
+
+    const conversation = await Conversation.create({
+      businessId,
+      customerId: customerId || "anonymous",
+    });
+
+    res.status(201).json(conversation);
+  } catch (error) {
+    console.error("Create conversation error:", error);
+    res.status(500).json({ message: "Failed to create conversation" });
   }
 };

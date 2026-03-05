@@ -1,27 +1,18 @@
 export default function Message({ message }) {
-  const isAgent = message.sender === "agent";
+  const isAI = message.sender === "ai";
 
   return (
-    <div
-      className={`flex ${
-        isAgent ? "justify-end" : "justify-start"
-      }`}
-    >
+    <div className={`flex ${isAI ? "justify-start" : "justify-end"}`}>
       <div
         className={`max-w-xs px-4 py-2 rounded-lg text-sm ${
-          isAgent
-            ? "bg-gray-900 text-white"
-            : "bg-white border"
+          isAI ? "bg-white border" : "bg-gray-900 text-white"
         }`}
       >
-        <div>{message.text}</div>
+        <div>{message.content}</div> {/* ✅ was message.text */}
 
-        {/* timestamp */}
         <div
           className={`text-[10px] mt-1 ${
-            isAgent
-              ? "text-gray-300"
-              : "text-gray-400"
+            isAI ? "text-gray-400" : "text-gray-300"
           }`}
         >
           {new Date(message.createdAt).toLocaleTimeString()}

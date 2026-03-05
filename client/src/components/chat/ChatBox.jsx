@@ -1,17 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addMessage } from "../../store/chat.slice";
+import { addMessage, setMessages } from "../../store/chat.slice";
 import Message from "./Message";
 import axios from "../../services/apiClient";
+import { getSocket } from "../../services/socketClient";
+
+const EMPTY_ARRAY = [];
 
 export default function ChatBox({ conversationId }) {
   const dispatch = useDispatch();
 
-  const EMPTY = [];
-
   const messages = useSelector(
-    (state) =>
-      state.chat.messagesByConversation[conversationId] || EMPTY
+    (state) => state.chat.messagesByConversation?.[conversationId] || EMPTY_ARRAY
   );
 
   const businessId = useSelector(
@@ -20,32 +20,61 @@ export default function ChatBox({ conversationId }) {
 
   const [text, setText] = useState("");
 
+  /**
+   * ===============================
+   * LOAD MESSAGE HISTORY
+   * ===============================
+   */
+  useEffect(() => {
+    if (!conversationId) return;
+
+    axios
+      .get(`/chat/history/${conversationId}`)
+      .then((res) => {
+        dispatch(setMessages({ conversationId, messages: res.data }));
+      })
+      .catch((err) => console.error(err));
+  }, [conversationId, dispatch]);
+
+  /**
+   * ===============================
+   * SEND MESSAGE
+   * ===============================
+   */
   const handleSend = async () => {
-    if (!text.trim()) return;
+  if (!text.trim()) return;
 
-    const optimisticMessage = {
-      conversation: conversationId,
-      sender: "user",
-      content: text,
-      createdAt: new Date().toISOString(),
-    };
+  // ✅ ensure socket is in the room before sending
+  const socket = getSocket();
+  if (socket && conversationId) {
+    socket.emit("join-conversation", { conversationId });
+  }
 
-    dispatch(addMessage(optimisticMessage));
-    setText("");
-
-    try {
-      await axios.post("/chat/message-async", {
-        message: text,
-        businessId,
-        conversationId,
-      });
-    } catch (err) {
-      console.error("Send failed", err);
-    }
+  const optimisticMessage = {
+    conversation: conversationId,
+    sender: "user",
+    content: text,
+    createdAt: new Date().toISOString(),
   };
+
+  dispatch(addMessage(optimisticMessage));
+  setText("");
+
+  try {
+    await axios.post("/chat/message-async", {
+      message: text,
+      businessId,
+      conversationId,
+    });
+  } catch (err) {
+    console.error("Send failed", err);
+  }
+};
 
   return (
     <div className="flex flex-col h-full">
+
+      {/* Messages */}
       <div className="flex-1 space-y-3 overflow-y-auto mb-3">
         {messages.length === 0 ? (
           <p className="text-gray-400 text-sm">No messages yet</p>
@@ -56,10 +85,12 @@ export default function ChatBox({ conversationId }) {
         )}
       </div>
 
+      {/* Input */}
       <div className="flex border-t pt-3">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
           placeholder="Type message..."
           className="flex-1 border rounded px-3 py-2 mr-2"
         />
@@ -70,6 +101,7 @@ export default function ChatBox({ conversationId }) {
           Send
         </button>
       </div>
+
     </div>
   );
 }

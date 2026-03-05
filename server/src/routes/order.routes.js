@@ -5,6 +5,6 @@ import { createOrder, getOrderByNumber } from "../controllers/order.controller.j
 const router = express.Router();
 
 router.post("/", authMiddleware, createOrder);
-router.get("/:businessId/:orderNumber", authMiddleware, getOrderByNumber);
+router.get("/:businessId/:orderNumber",  getOrderByNumber);
 
 export default router;

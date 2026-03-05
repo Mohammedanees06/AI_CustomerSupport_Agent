@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Widget Test Page</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f4f6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .page {
+      text-align: center;
+      max-width: 600px;
+      padding: 40px 20px;
+    }
+    h1 { font-size: 32px; color: #111827; margin-bottom: 12px; }
+    p { color: #6b7280; font-size: 16px; line-height: 1.6; }
+    .badge {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 8px 16px;
+      background: #d1fae5;
+      color: #065f46;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>🛒 Demo Store</h1>
+    <p>This is a sample customer-facing website.<br/>
+    Click the chat button in the bottom right to get AI support.</p>
+    <div class="badge">✅ AI Support Widget Active</div>
+  </div>
+
+  <!-- 
+    EMBED WIDGET — one line of code for any website.
+    Replace YOUR_BUSINESS_ID with your actual business _id from MongoDB.
+    Replace the src URL with your deployed server URL in production.
+  -->
+  <script
+    src="http://localhost:5000/widget.js"
+    data-business-id="69a69533825e148d4442455c"
+    data-server-url="http://localhost:5000"
+  ></script>
+</body>
+</html>

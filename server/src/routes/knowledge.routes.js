@@ -1,19 +1,28 @@
 import express from "express";
 import authMiddleware from "../middlewares/auth.middleware.js";
-import { uploadKnowledge } from "../controllers/knowledge.controller.js";
+import {
+  uploadKnowledge,
+  scrapeWebsite,
+  uploadFAQ,
+  clearKnowledge,
+} from "../controllers/knowledge.controller.js";
 import multer from "multer";
 
 const router = express.Router();
 
-//  Configure Multer (store file in memory)
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+// PDF or text upload
+router.post("/upload", authMiddleware, upload.single("file"), uploadKnowledge);
 
-// Accept file upload
-router.post("/upload", authMiddleware,
-  upload.single("file"),   // THIS enables file upload
-  uploadKnowledge
-);
+// Website scraping
+router.post("/scrape", authMiddleware, scrapeWebsite);
+
+// Bulk FAQ upload
+router.post("/faq", authMiddleware, uploadFAQ);
+
+// Clear all knowledge for a business
+router.delete("/:businessId", authMiddleware, clearKnowledge);
 
 export default router;
