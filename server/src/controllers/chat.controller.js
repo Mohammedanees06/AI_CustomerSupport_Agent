@@ -365,9 +365,24 @@ export const createConversation = async (req, res) => {
       return res.status(400).json({ message: "businessId is required" });
     }
 
+    const resolvedCustomerId = customerId || "anonymous";
+
+    // ✅ Reuse existing conversation for same business + customer
+    // This prevents duplicate conversations every time widget reloads
+    const existing = await Conversation.findOne({
+      businessId,
+      customerId: resolvedCustomerId,
+      status: "open", // only reuse open conversations
+    });
+
+    if (existing) {
+      return res.status(200).json(existing);
+    }
+
+    // No existing conversation — create a new one
     const conversation = await Conversation.create({
       businessId,
-      customerId: customerId || "anonymous",
+      customerId: resolvedCustomerId,
     });
 
     res.status(201).json(conversation);
@@ -376,3 +391,51 @@ export const createConversation = async (req, res) => {
     res.status(500).json({ message: "Failed to create conversation" });
   }
 };
+
+
+
+
+export const agentReply = async (req, res) => {
+  try {
+    const { conversationId, message } = req.body;
+
+    if (!conversationId || !message) {
+      return res.status(400).json({ message: "conversationId and message required" });
+    }
+
+    // Save agent message directly — no AI, no queue
+    const agentMsg = await Message.create({
+      conversation: conversationId,
+      sender: "agent",
+      content: message,
+    });
+
+    // Update conversation updatedAt
+    await Conversation.findByIdAndUpdate(conversationId, { updatedAt: new Date() });
+
+    // Emit to customer's widget via Redis pub/sub
+    const io = getIO();
+    io.to(conversationId.toString()).emit("new-message", agentMsg);
+
+    res.status(201).json(agentMsg);
+  } catch (error) {
+    console.error("Agent reply error:", error);
+    res.status(500).json({ message: "Failed to send agent reply" });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

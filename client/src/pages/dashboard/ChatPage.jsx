@@ -1,15 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { setActiveConversation, setConversations } from "../../store/chat.slice";
 import ChatBox from "../../components/chat/ChatBox";
 import useSocket from "../../hooks/useSocket";
 import { getSocket } from "../../services/socketClient";
 import axios from "../../services/apiClient";
 
-// the Format for customerId to display
-// "anonymous"       → "Customer"
-// "order:ORD-001"   → "📦 ORD-001"
-// "anything else"   → as-is
 function formatCustomerId(customerId) {
   if (!customerId || customerId === "anonymous") return "Customer";
   if (customerId.startsWith("order:")) return `📦 ${customerId.replace("order:", "")}`;
@@ -20,10 +17,15 @@ export default function ChatPage() {
   const dispatch = useDispatch();
   useSocket();
 
+  const [searchParams] = useSearchParams();
   const { conversations, activeConversationId } = useSelector((state) => state.chat);
   const businessId = useSelector((state) => state.business.business?._id);
   const previousConversationRef = useRef(null);
 
+  // ============================================
+  // FETCH CONVERSATIONS ONCE ON LOAD
+  // No polling — sidebar updates via socket
+  // ============================================
   useEffect(() => {
     if (!businessId) return;
 
@@ -31,13 +33,19 @@ export default function ChatPage() {
       .get(`/chat/conversations/${businessId}`)
       .then((res) => {
         dispatch(setConversations(res.data));
-        if (res.data.length > 0) {
+        const targetId = searchParams.get("conversation");
+        if (targetId) {
+          dispatch(setActiveConversation(targetId));
+        } else if (res.data.length > 0) {
           dispatch(setActiveConversation(res.data[0]._id));
         }
       })
       .catch((err) => console.error("Conversations fetch failed:", err.message));
   }, [businessId, dispatch]);
 
+  // ============================================
+  // JOIN / LEAVE CONVERSATION ROOM
+  // ============================================
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
@@ -103,20 +111,17 @@ export default function ChatPage() {
 
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-gray-500 truncate">
-                      {lastMsg?.sender === "ai" && (
-                        <span className="text-gray-400">AI: </span>
-                      )}
+                      {lastMsg?.sender === "ai" && <span className="text-gray-400">AI: </span>}
+                      {lastMsg?.sender === "agent" && <span className="text-blue-400">Agent: </span>}
                       {preview}
                     </p>
-                    <span
-                      className={`ml-2 shrink-0 text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                        conv.status === "open"
-                          ? "bg-green-100 text-green-700"
-                          : conv.status === "escalated"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-gray-100 text-gray-500"
-                      }`}
-                    >
+                    <span className={`ml-2 shrink-0 text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                      conv.status === "open"
+                        ? "bg-green-100 text-green-700"
+                        : conv.status === "escalated"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-gray-100 text-gray-500"
+                    }`}>
                       {conv.status}
                     </span>
                   </div>
@@ -129,14 +134,24 @@ export default function ChatPage() {
 
       {/* RIGHT PANEL */}
       <div className="flex-1 flex flex-col">
-        <div className="border-b p-4 font-semibold text-gray-800">
-          {activeConversation
-            ? formatCustomerId(activeConversation.customerId)
-            : "Select Conversation"}
+        <div className="border-b p-4 font-semibold text-gray-800 flex items-center justify-between">
+          <span>
+            {activeConversation
+              ? formatCustomerId(activeConversation.customerId)
+              : "Select Conversation"}
+          </span>
+          {activeConversation && (
+            <span className="text-xs text-gray-400 font-normal">
+              Agent handoff mode
+            </span>
+          )}
         </div>
 
         <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
-          <ChatBox conversationId={activeConversationId} />
+          {activeConversationId
+            ? <ChatBox conversationId={activeConversationId} />
+            : <p className="text-gray-400 text-sm">Select a conversation</p>
+          }
         </div>
       </div>
     </div>
