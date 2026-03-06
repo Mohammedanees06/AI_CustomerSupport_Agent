@@ -127,28 +127,187 @@ It is designed as both a **working product** and a **learning reference** for bu
 
 ```
 ai-customer-support/
-├── client/                        # React dashboard
-│   └── src/
-│       ├── app/                   # Redux store + routes
-│       ├── components/            # Reusable UI components
-│       ├── pages/
-│       │   ├── auth/              # Login, Register
-│       │   └── dashboard/         # Chat, Tickets, Knowledge, Analytics
-│       └── features/              # Redux slices
 │
-└── server/                        # Express backend
-    └── src/
-        ├── config/                # DB, Redis, Socket, Passport
-        ├── controllers/           # Route handlers
-        ├── models/                # Mongoose schemas
-        ├── routes/                # Express routers
-        ├── services/
-        │   ├── ai/                # Gemini, embeddings, RAG
-        │   ├── queue/             # BullMQ worker + job processor
-        │   └── analytics.service.js
-        └── middleware/            # Auth, rate limiting
-    ├── server.js                  # Entry point
-    └── widget.js                  # Embeddable customer widget
+├── client/                              # React dashboard (business owner UI)
+│   ├── public/
+│   │   └── widget.js                    # Dev copy of embeddable widget
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── App.jsx                  # Root React component
+│   │   │   ├── providers.jsx            # Redux, Socket, i18n providers
+│   │   │   └── routes.jsx               # All app routes defined here
+│   │   │
+│   │   ├── assets/
+│   │   │   └── react.svg
+│   │   │
+│   │   ├── components/
+│   │   │   ├── chat/
+│   │   │   │   ├── ChatBox.jsx          # Main chat UI container
+│   │   │   │   ├── Message.jsx          # Single message bubble
+│   │   │   │   └── VoiceButton.jsx      # Start/stop AI voice call
+│   │   │   ├── common/
+│   │   │   │   ├── Button.jsx           # Reusable button
+│   │   │   │   ├── Loader.jsx           # Loading spinner
+│   │   │   │   └── Modal.jsx            # Reusable modal/popup
+│   │   │   └── dashboard/
+│   │   │       ├── Chart.jsx            # Analytics graphs
+│   │   │       └── StatsCard.jsx        # Metric number cards
+│   │   │
+│   │   ├── features/
+│   │   │   ├── analytics/
+│   │   │   │   └── analytics.api.js     # Fetch analytics data
+│   │   │   ├── auth/
+│   │   │   │   ├── auth.api.js          # Login/signup API calls
+│   │   │   │   └── auth.thunks.js       # Async Redux auth actions
+│   │   │   ├── chat/
+│   │   │   │   ├── chat.api.js          # Chat API calls
+│   │   │   │   ├── chat.socket.js       # Socket.IO send/receive
+│   │   │   │   └── chat.thunks.js       # Async chat actions
+│   │   │   └── voice/
+│   │   │       ├── voice.api.js         # Voice call API calls
+│   │   │       └── voice.thunks.js      # Async voice actions
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── useAuth.js               # Auth logic hook
+│   │   │   ├── useSocket.js             # Socket connection + cleanup
+│   │   │   └── useVoice.js              # Microphone and audio stream
+│   │   │
+│   │   ├── layouts/
+│   │   │   ├── BusinessSetup.jsx        # Onboarding layout
+│   │   │   ├── DashboardHeader.jsx      # Top nav bar
+│   │   │   └── DashboardLayout.jsx      # Sidebar + content wrapper
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── auth/
+│   │   │   │   ├── GoogleAuthSuccess.jsx
+│   │   │   │   ├── Login.jsx
+│   │   │   │   └── Register.jsx
+│   │   │   └── dashboard/
+│   │   │       ├── AnalyticsPage.jsx    # Metrics + charts
+│   │   │       ├── ChatPage.jsx         # Conversations list + messages
+│   │   │       ├── Dashboard.jsx        # Knowledge base management
+│   │   │       ├── EmbedPage.jsx        # Script tag embed code
+│   │   │       └── TicketsPage.jsx      # Support tickets
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── BusinessGuard.jsx        # Redirects if no business setup
+│   │   │   └── ProtectedRoute.jsx       # Redirects if not logged in
+│   │   │
+│   │   ├── services/
+│   │   │   ├── apiClient.js             # Axios instance with base URL + headers
+│   │   │   ├── i18n.js                  # Language translation setup
+│   │   │   └── socketClient.js          # Single socket connection instance
+│   │   │
+│   │   ├── store/
+│   │   │   ├── index.js                 # Redux store setup
+│   │   │   ├── app.slice.js             # Theme, language, alerts
+│   │   │   ├── auth.slice.js            # User, token, auth state
+│   │   │   ├── business.slice.js        # Business info
+│   │   │   ├── chat.slice.js            # Messages, active conversation
+│   │   │   └── voice.slice.js           # Call state (ringing, active, muted)
+│   │   │
+│   │   ├── styles/
+│   │   │   ├── App.css
+│   │   │   └── index.css                # Global Tailwind styles
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── constants.js             # Fixed values (roles, limits)
+│   │   │   ├── formatters.js            # Date, currency, phone formatters
+│   │   │   └── validators.js            # Input validation helpers
+│   │   │
+│   │   ├── main.jsx                     # React entry point
+│   │   └── test.html                    # Local widget test page
+│   │
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── eslint.config.js
+│   └── package.json
+│
+├── server/                              # Express backend
+│   └── src/
+│       ├── config/
+│       │   ├── db.js                    # MongoDB connection
+│       │   ├── env.js                   # Environment variable loader
+│       │   ├── passport.js              # Google OAuth strategy
+│       │   ├── redis.js                 # Redis connection
+│       │   └── socket.js               # Socket.IO + Redis pub/sub subscriber
+│       │
+│       ├── controllers/
+│       │   ├── analytics.controller.js
+│       │   ├── auth.controller.js
+│       │   ├── business.controller.js
+│       │   ├── chat.controller.js       # sendMessage, sendMessageAsync, getConversations
+│       │   ├── googleAuthController.js
+│       │   ├── knowledge.controller.js  # PDF, text, scrape, FAQ upload
+│       │   ├── monitor.controller.js    # Queue stats
+│       │   ├── order.controller.js
+│       │   ├── ticket.controller.js
+│       │   └── voice.controller.js      # handleIncomingCall, processSpeech
+│       │
+│       ├── jobs/
+│       │   └── ai.job.js                # Background AI job logic
+│       │
+│       ├── middlewares/
+│       │   ├── auth.middleware.js        # JWT verification
+│       │   ├── error.middleware.js       # Central error handler
+│       │   └── rateLimit.middleware.js   # Abuse prevention
+│       │
+│       ├── models/
+│       │   ├── Analytics.model.js
+│       │   ├── Business.model.js
+│       │   ├── Knowledge.model.js        # Embeddings + text chunks
+│       │   ├── Message.model.js
+│       │   ├── Order.model.js
+│       │   ├── Ticket.model.js
+│       │   ├── User.js
+│       │   └── conversation.model.js
+│       │
+│       ├── routes/
+│       │   ├── analytics.routes.js
+│       │   ├── authRoutes.js
+│       │   ├── business.routes.js
+│       │   ├── chat.routes.js
+│       │   ├── knowledge.routes.js
+│       │   ├── monitor.routes.js
+│       │   ├── order.routes.js
+│       │   ├── ticket.routes.js
+│       │   └── voice.routes.js
+│       │
+│       ├── services/
+│       │   ├── ai/
+│       │   │   ├── ai.service.js         # Gemini API — generates replies
+│       │   │   ├── embedding.service.js  # Text → vector embeddings
+│       │   │   ├── rag.service.js        # Similarity search on knowledge base
+│       │   │   └── tts.service.js        # Text-to-speech
+│       │   ├── cache/
+│       │   │   └── redis.service.js      # Redis get/set helpers
+│       │   ├── integrations/
+│       │   │   ├── shopify.service.js    # Shopify order integration
+│       │   │   └── woocommerce.service.js
+│       │   ├── queue/
+│       │   │   ├── ai.queue.js           # BullMQ queue definition
+│       │   │   └── worker.js             # AI job processor (separate process)
+│       │   ├── socket/
+│       │   │   └── socket.service.js     # Emits realtime events
+│       │   ├── voice/
+│       │   │   ├── call.service.js       # Manages call flow
+│       │   │   └── stt.service.js        # Speech-to-text
+│       │   └── analytics.service.js      # incrementMetric helper
+│       │
+│       ├── test/
+│       │   ├── gemini.test.js
+│       │   └── list-models.js
+│       │
+│       ├── utils/                        # Shared backend helpers
+│       ├── app.js                        # Express app setup
+│       ├── server.js                     # HTTP server entry point
+│       └── widget.js                     # Embeddable customer widget (served at /widget.js)
+│
+│   └── package.json
+│
+├── .gitignore
+├── README.md
+└── NOTES.md                             # Architecture and concept notes
 ```
 
 ---
