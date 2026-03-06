@@ -100,7 +100,6 @@ export const sendMessage = async (req, res) => {
      * ==========================================================
      * 4️⃣ ORDER DETECTION (Structured DB Query)
      * If question contains order number → skip AI & RAG
-     * ✅ Fixed regex: [\w-]+ now matches hyphenated IDs like ORD-001
      * ==========================================================
      */
     const orderMatch = message.match(/order\s*#?([\w-]+)/i);
@@ -367,7 +366,7 @@ export const createConversation = async (req, res) => {
 
     const resolvedCustomerId = customerId || "anonymous";
 
-    // ✅ Reuse existing conversation for same business + customer
+    // Reuse existing conversation for same business + customer
     // This prevents duplicate conversations every time widget reloads
     const existing = await Conversation.findOne({
       businessId,

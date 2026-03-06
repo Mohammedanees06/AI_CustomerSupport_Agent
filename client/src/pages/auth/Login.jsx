@@ -16,9 +16,9 @@ export default function Login() {
   });
 
   useEffect(() => {
-    if (!token) return; // ✅ exit early — not logged in
-    navigate(hasBusiness ? "/dashboard" : "/business-setup", { replace: true }); // ✅ replace prevents back-button loop
-  }, [token, hasBusiness]); // ✅ navigate omitted to prevent loop
+    if (!token) return; //  exit early — not logged in
+    navigate(hasBusiness ? "/dashboard" : "/business-setup", { replace: true }); // replace prevents back-button loop
+  }, [token, hasBusiness]); //  navigate omitted to prevent loop
 
   const handleChange = (e) => {
     setForm({

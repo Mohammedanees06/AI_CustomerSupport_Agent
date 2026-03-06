@@ -9,7 +9,7 @@ const initialState = {
   isAuthenticated: !!storedToken,
   loading: false,
   error: null,
-  initialized: false, // ✅ Wait… checking authentication.
+  initialized: false, //  Wait… checking authentication.
 };
 
 const authSlice = createSlice({
@@ -28,7 +28,7 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.initialized = true;
 
-      // ✅ persist session
+      // persist session
       localStorage.setItem("token", action.payload.token);
       localStorage.setItem("user", JSON.stringify(action.payload.user));
     },

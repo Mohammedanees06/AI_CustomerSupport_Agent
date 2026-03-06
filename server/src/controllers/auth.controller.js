@@ -1,8 +1,3 @@
-/**
- * Auth Controller
- * Handles user registration and login
- */
-
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";

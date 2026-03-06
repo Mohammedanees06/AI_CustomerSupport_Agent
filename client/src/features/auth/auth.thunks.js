@@ -23,7 +23,7 @@ export const loginUser = (formData) => async (dispatch) => {
     // persist token
     localStorage.setItem("token", token);
 
-    // ✅ IMPORTANT: set axios auth immediately
+    //  set axios auth immediately
     apiClient.defaults.headers.common.Authorization =
       `Bearer ${token}`;
 
@@ -68,7 +68,7 @@ export const registerUser = (formData) => async (dispatch) => {
     // persist token
     localStorage.setItem("token", token);
 
-    // ✅ sync axios auth
+    //  sync axios auth
     apiClient.defaults.headers.common.Authorization =
       `Bearer ${token}`;
 

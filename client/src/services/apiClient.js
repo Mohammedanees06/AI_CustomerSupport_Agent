@@ -14,7 +14,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
      console.log("API REQUEST:", config.method, config.url);
-    // ✅ start global loader
+    //  start global loader
     store.dispatch(setLoading(true));
 
     // attach auth token
@@ -42,7 +42,7 @@ apiClient.interceptors.request.use(
 // runs after EVERY api response
 apiClient.interceptors.response.use(
   (response) => {
-    // ✅ stop loader
+    // stop loader
     store.dispatch(setLoading(false));
     return response;
   },

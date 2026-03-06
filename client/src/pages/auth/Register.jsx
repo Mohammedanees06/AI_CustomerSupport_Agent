@@ -8,7 +8,7 @@ export default function Register() {
   const navigate = useNavigate();
 
   const { loading, error, token } = useSelector((state) => state.auth);
-  const hasBusiness = useSelector((state) => !!state.business.business); // ✅ stable boolean
+  const hasBusiness = useSelector((state) => !!state.business.business); // stable boolean
 
   const [form, setForm] = useState({
     name: "",
@@ -17,9 +17,9 @@ export default function Register() {
   });
 
   useEffect(() => {
-    if (!token) return; // ✅ exit early — not logged in
-    navigate(hasBusiness ? "/dashboard" : "/business-setup", { replace: true }); // ✅ replace prevents back-button loop
-  }, [token, hasBusiness]); // ✅ navigate omitted to prevent loop
+    if (!token) return; //  exit early — not logged in
+    navigate(hasBusiness ? "/dashboard" : "/business-setup", { replace: true }); //  replace prevents back-button loop
+  }, [token, hasBusiness]); // navigate omitted to prevent loop
 
   const handleChange = (e) => {
     setForm({

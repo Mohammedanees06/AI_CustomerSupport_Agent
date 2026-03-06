@@ -1,10 +1,9 @@
 import Business from "../models/Business.model.js";
 
-/**
- * CREATE BUSINESS
- * One user creates one business
- */
-// business.controller.js
+/** CREATE BUSINESS
+ * One user creates one business */
+
+
 export const createBusiness = async (req, res) => {
   try {
     if (!req.user || !req.user._id) {

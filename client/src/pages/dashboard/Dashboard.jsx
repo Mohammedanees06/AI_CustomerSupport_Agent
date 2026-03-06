@@ -231,13 +231,13 @@ export default function Dashboard() {
       {/* Status */}
       {status === "success" && result && (
         <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800">
-          ✅ {result.message}
+          {result.message}
           {result.chunksStored && <> — <strong>{result.chunksStored}</strong> chunks stored.</>}
         </div>
       )}
       {status === "error" && result && (
         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-800">
-          ❌ {result.message}
+           {result.message}
         </div>
       )}
     </div>

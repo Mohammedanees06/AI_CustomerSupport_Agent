@@ -6,7 +6,7 @@ const appSlice = createSlice({
     theme: "light",
     language: "en",
     alerts: [],
-    loading: false, // ✅ global API loading state
+    loading: false, // global API loading state
   },
   reducers: {
     setTheme: (state, action) => {
@@ -17,14 +17,14 @@ const appSlice = createSlice({
       state.language = action.payload;
     },
 
-    // ✅W reducer used by apiClient interceptor
+    // reducer used by apiClient interceptor
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
   },
 });
 
-// ✅ export  action also
+//  export  action also
 export const { setTheme, setLanguage, setLoading } =
   appSlice.actions;
 
