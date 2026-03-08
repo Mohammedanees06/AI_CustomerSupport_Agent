@@ -22,6 +22,18 @@
   let callPanelOpen = false;
 
   // ============================================================
+  // UNIQUE SESSION ID PER BROWSER
+  // ============================================================
+  function getSessionId() {
+    let sessionId = localStorage.getItem("ai_support_session_" + BUSINESS_ID);
+    if (!sessionId) {
+      sessionId = "guest_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
+      localStorage.setItem("ai_support_session_" + BUSINESS_ID, sessionId);
+    }
+    return sessionId;
+  }
+
+  // ============================================================
   // STYLES
   // ============================================================
   const style = document.createElement("style");
@@ -79,6 +91,7 @@
     #ai-widget-body::-webkit-scrollbar { width: 4px; }
     #ai-widget-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
 
+    /* ORDER SCREEN */
     #ai-widget-order-screen {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
@@ -87,27 +100,41 @@
     #ai-widget-order-screen .icon { font-size: 40px; }
     #ai-widget-order-screen h3 { font-size: 16px; font-weight: 600; color: #111827; margin: 0; }
     #ai-widget-order-screen p { font-size: 13px; color: #6b7280; text-align: center; margin: 0; }
-    #ai-widget-order-input {
+
+    /* CONTACT SCREEN */
+    #ai-widget-contact-screen {
+      flex: 1; display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 24px; gap: 12px; background: #f9fafb;
+    }
+    #ai-widget-contact-screen .icon { font-size: 40px; }
+    #ai-widget-contact-screen h3 { font-size: 16px; font-weight: 600; color: #111827; margin: 0; }
+    #ai-widget-contact-screen p { font-size: 13px; color: #6b7280; text-align: center; margin: 0; }
+
+    #ai-widget-order-input, #ai-contact-name, #ai-contact-email {
       width: 100%; padding: 10px 14px;
       border: 1.5px solid #e5e7eb; border-radius: 8px;
       font-size: 14px; outline: none; box-sizing: border-box;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s; font-family: inherit;
     }
-    #ai-widget-order-input:focus { border-color: #111827; }
-    #ai-widget-order-btn {
+    #ai-widget-order-input:focus, #ai-contact-name:focus, #ai-contact-email:focus {
+      border-color: #111827;
+    }
+    #ai-widget-order-btn, #ai-contact-submit {
       width: 100%; padding: 10px; background: #111827;
       color: white; border: none; border-radius: 8px;
       font-size: 14px; font-weight: 500; cursor: pointer;
       transition: background 0.2s;
     }
-    #ai-widget-order-btn:hover { background: #1f2937; }
-    #ai-widget-order-btn:disabled { background: #9ca3af; cursor: not-allowed; }
-    #ai-widget-order-error { color: #ef4444; font-size: 12px; text-align: center; min-height: 16px; }
-    .skip-link {
+    #ai-widget-order-btn:hover, #ai-contact-submit:hover { background: #1f2937; }
+    #ai-widget-order-btn:disabled, #ai-contact-submit:disabled { background: #9ca3af; cursor: not-allowed; }
+    #ai-widget-order-error, #ai-contact-error { color: #ef4444; font-size: 12px; text-align: center; min-height: 16px; }
+    .skip-link, .back-link {
       font-size: 12px; color: #6b7280; cursor: pointer;
       text-decoration: underline; background: none; border: none; padding: 0;
+      font-family: inherit;
     }
-    .skip-link:hover { color: #111827; }
+    .skip-link:hover, .back-link:hover { color: #111827; }
 
     .ai-msg, .user-msg {
       max-width: 80%; padding: 10px 14px; border-radius: 12px;
@@ -161,9 +188,7 @@
       justify-content: center; flex-shrink: 0;
       transition: background 0.2s;
     }
-    #ai-widget-send {
-      background: #111827; color: white;
-    }
+    #ai-widget-send { background: #111827; color: white; }
     #ai-widget-send:hover { background: #374151; }
     #ai-widget-send:disabled { background: #9ca3af; cursor: not-allowed; }
     #ai-widget-call-btn {
@@ -226,6 +251,7 @@
       <button id="ai-widget-close">✕</button>
     </div>
 
+    <!-- STEP 1: Order ID screen -->
     <div id="ai-widget-order-screen">
       <div class="icon">📦</div>
       <h3>Welcome! How can we help?</h3>
@@ -234,6 +260,18 @@
       <div id="ai-widget-order-error"></div>
       <button id="ai-widget-order-btn">Start Chat</button>
       <button class="skip-link" id="ai-widget-skip">Skip — I have a general question</button>
+    </div>
+
+    <!-- STEP 2: Contact details screen (shown after skip) -->
+    <div id="ai-widget-contact-screen">
+      <div class="icon">👋</div>
+      <h3>Just a quick intro</h3>
+      <p>So we can follow up with you if needed.</p>
+      <input id="ai-contact-name" type="text" placeholder="Your name" />
+      <input id="ai-contact-email" type="email" placeholder="Your email address" />
+      <div id="ai-contact-error"></div>
+      <button id="ai-contact-submit">Continue to Chat</button>
+      <button class="back-link" id="ai-contact-back">← Back</button>
     </div>
 
     <div id="ai-widget-body" style="display:none;"></div>
@@ -302,16 +340,17 @@
     if (t) t.remove();
   }
 
-  function switchToChat() {
+  function switchToChat(customerName) {
     document.getElementById("ai-widget-order-screen").style.display = "none";
+    document.getElementById("ai-widget-contact-screen").style.display = "none";
     document.getElementById("ai-widget-body").style.display = "flex";
     document.getElementById("ai-widget-footer").style.display = "flex";
-    appendMessage(
-      orderId
-        ? `Hi! I've noted your Order ID <strong>#${orderId}</strong>. What can I help you with?`
-        : "Hi! I'm your AI support assistant. What can I help you with today?",
-      "ai"
-    );
+    const greeting = customerName
+      ? `Hi <strong>${customerName}</strong>! I'm your AI support assistant. What can I help you with today?`
+      : orderId
+      ? `Hi! I've noted your Order ID <strong>#${orderId}</strong>. What can I help you with?`
+      : "Hi! I'm your AI support assistant. What can I help you with today?";
+    appendMessage(greeting, "ai");
     connectSocket();
     document.getElementById("ai-widget-input").focus();
   }
@@ -367,8 +406,8 @@
 
       const order = await res.json();
       orderId = order.orderNumber;
-      await createConversation(`order:${orderId}`);
-      switchToChat();
+      await createConversation(`order:${orderId}`, null, null);
+      switchToChat(null);
     } catch (err) {
       errorEl.textContent = "Something went wrong. Please try again.";
       submitBtn.disabled = false;
@@ -377,13 +416,51 @@
   }
 
   // ============================================================
+  // CONTACT FORM SUBMIT
+  // ============================================================
+  async function handleContactSubmit() {
+    const nameInput = document.getElementById("ai-contact-name");
+    const emailInput = document.getElementById("ai-contact-email");
+    const errorEl = document.getElementById("ai-contact-error");
+    const submitBtn = document.getElementById("ai-contact-submit");
+
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+
+    errorEl.textContent = "";
+
+    if (!name) { errorEl.textContent = "Please enter your name."; return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errorEl.textContent = "Please enter a valid email."; return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Starting chat...";
+
+    try {
+      const sessionId = getSessionId();
+      await createConversation(sessionId, name, email);
+      switchToChat(name);
+    } catch (err) {
+      errorEl.textContent = "Something went wrong. Please try again.";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Continue to Chat";
+    }
+  }
+
+  // ============================================================
   // CREATE CONVERSATION
   // ============================================================
-  async function createConversation(customerId) {
+  async function createConversation(customerId, customerName, customerEmail) {
     const res = await fetch(`${SERVER_URL}/api/chat/conversation`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ businessId: BUSINESS_ID, customerId }),
+      body: JSON.stringify({
+        businessId: BUSINESS_ID,
+        customerId,
+        customerName: customerName || null,
+        customerEmail: customerEmail || null,
+      }),
     });
     if (!res.ok) throw new Error("Failed to create conversation");
     const data = await res.json();
@@ -518,11 +595,25 @@
   document.getElementById("ai-widget-order-input").addEventListener("keydown", (e) => {
     if (e.key === "Enter") handleOrderSubmit();
   });
-  document.getElementById("ai-widget-skip").addEventListener("click", async () => {
-    orderId = null;
-    try { await createConversation("anonymous"); } catch (e) {}
-    switchToChat();
+
+  // Skip → show contact form
+  document.getElementById("ai-widget-skip").addEventListener("click", () => {
+    document.getElementById("ai-widget-order-screen").style.display = "none";
+    document.getElementById("ai-widget-contact-screen").style.display = "flex";
+    document.getElementById("ai-contact-name").focus();
   });
+
+  // Back → show order screen
+  document.getElementById("ai-contact-back").addEventListener("click", () => {
+    document.getElementById("ai-widget-contact-screen").style.display = "none";
+    document.getElementById("ai-widget-order-screen").style.display = "flex";
+  });
+
+  document.getElementById("ai-contact-submit").addEventListener("click", handleContactSubmit);
+  document.getElementById("ai-contact-email").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleContactSubmit();
+  });
+
   document.getElementById("ai-widget-send").addEventListener("click", sendMessage);
   document.getElementById("ai-widget-input").addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }

@@ -319,7 +319,6 @@ export const getChatHistory = async (req, res) => {
 export const getConversations = async (req, res) => {
   try {
     const { businessId } = req.params;
-
     console.log("Fetching conversations for:", businessId);
 
     const conversations = await Conversation.find({
@@ -328,16 +327,24 @@ export const getConversations = async (req, res) => {
 
     console.log("Found:", conversations.length);
 
-    // Enrich with last message
     const enriched = await Promise.all(
       conversations.map(async (conv) => {
         const lastMessage = await Message.findOne({ conversation: conv._id })
           .sort({ createdAt: -1 })
           .select("content sender createdAt");
 
+        // ✅ Fetch order if customerId is "order:ORD-XXX"
+        let orderInfo = null;
+        if (conv.customerId?.startsWith("order:")) {
+          const orderNumber = conv.customerId.replace("order:", "");
+          orderInfo = await Order.findOne({ business: businessId, orderNumber })
+            .select("orderNumber customerEmail status trackingNumber totalAmount");
+        }
+
         return {
           ...conv.toObject(),
           lastMessage: lastMessage || null,
+          orderInfo: orderInfo || null,
         };
       })
     );
@@ -358,7 +365,7 @@ export const getConversations = async (req, res) => {
  */
 export const createConversation = async (req, res) => {
   try {
-    const { businessId, customerId } = req.body;
+    const { businessId, customerId, customerName, customerEmail } = req.body;
 
     if (!businessId) {
       return res.status(400).json({ message: "businessId is required" });
@@ -366,22 +373,21 @@ export const createConversation = async (req, res) => {
 
     const resolvedCustomerId = customerId || "anonymous";
 
-    // Reuse existing conversation for same business + customer
-    // This prevents duplicate conversations every time widget reloads
     const existing = await Conversation.findOne({
       businessId,
       customerId: resolvedCustomerId,
-      status: "open", // only reuse open conversations
+      status: "open",
     });
 
     if (existing) {
       return res.status(200).json(existing);
     }
 
-    // No existing conversation — create a new one
     const conversation = await Conversation.create({
       businessId,
       customerId: resolvedCustomerId,
+      customerName: customerName || null,
+      customerEmail: customerEmail || null,
     });
 
     res.status(201).json(conversation);
@@ -390,7 +396,6 @@ export const createConversation = async (req, res) => {
     res.status(500).json({ message: "Failed to create conversation" });
   }
 };
-
 
 
 

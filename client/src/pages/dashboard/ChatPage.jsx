@@ -10,6 +10,7 @@ import axios from "../../services/apiClient";
 function formatCustomerId(customerId) {
   if (!customerId || customerId === "anonymous") return "Customer";
   if (customerId.startsWith("order:")) return `📦 ${customerId.replace("order:", "")}`;
+  if (customerId.startsWith("guest_")) return "Guest Customer";
   return customerId;
 }
 
@@ -24,7 +25,6 @@ export default function ChatPage() {
 
   // ============================================
   // FETCH CONVERSATIONS ONCE ON LOAD
-  // No polling — sidebar updates via socket
   // ============================================
   useEffect(() => {
     if (!businessId) return;
@@ -94,6 +94,11 @@ export default function ChatPage() {
                   : lastMsg.content
                 : "No messages yet";
 
+              // Show name if available, else format customerId
+              const displayName = conv.customerName
+                ? conv.customerName
+                : formatCustomerId(conv.customerId);
+
               return (
                 <div
                   key={conv._id}
@@ -104,7 +109,7 @@ export default function ChatPage() {
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-semibold text-gray-800 truncate">
-                      {formatCustomerId(conv.customerId)}
+                      {displayName}
                     </span>
                     <span className="text-[10px] text-gray-400 ml-2 shrink-0">{timeLabel}</span>
                   </div>
@@ -134,19 +139,65 @@ export default function ChatPage() {
 
       {/* RIGHT PANEL */}
       <div className="flex-1 flex flex-col">
-        <div className="border-b p-4 font-semibold text-gray-800 flex items-center justify-between">
-          <span>
-            {activeConversation
-              ? formatCustomerId(activeConversation.customerId)
-              : "Select Conversation"}
-          </span>
+
+        {/* CHAT HEADER */}
+        <div className="border-b px-4 py-3 flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <span className="font-semibold text-gray-800">
+              {activeConversation
+                ? (activeConversation.customerName || formatCustomerId(activeConversation.customerId))
+                : "Select Conversation"}
+            </span>
+
+            {/* Order customer info */}
+            {activeConversation?.orderInfo && (
+              <div className="flex flex-wrap gap-3">
+                <span className="text-xs text-gray-500">
+                  📧 {activeConversation.orderInfo.customerEmail}
+                </span>
+                <span className={`text-xs font-medium ${
+                  activeConversation.orderInfo.status === "delivered"
+                    ? "text-green-600"
+                    : activeConversation.orderInfo.status === "cancelled"
+                    ? "text-red-500"
+                    : activeConversation.orderInfo.status === "shipped"
+                    ? "text-blue-500"
+                    : "text-yellow-600"
+                }`}>
+                  ● {activeConversation.orderInfo.status}
+                </span>
+                <span className="text-xs text-gray-500">
+                  🚚 {activeConversation.orderInfo.trackingNumber || "N/A"}
+                </span>
+                <span className="text-xs text-gray-500">
+                  💰 ₹{activeConversation.orderInfo.totalAmount}
+                </span>
+              </div>
+            )}
+
+            {/* Anonymous / guest customer info */}
+            {activeConversation && !activeConversation.orderInfo && (
+              <div className="flex flex-wrap gap-3">
+                {activeConversation.customerEmail && (
+                  <span className="text-xs text-gray-500">
+                    📧 {activeConversation.customerEmail}
+                  </span>
+                )}
+                {!activeConversation.customerName && !activeConversation.customerEmail && (
+                  <span className="text-xs text-gray-400">No contact details</span>
+                )}
+              </div>
+            )}
+          </div>
+
           {activeConversation && (
-            <span className="text-xs text-gray-400 font-normal">
+            <span className="text-xs text-gray-400 font-normal shrink-0 ml-4">
               Agent handoff mode
             </span>
           )}
         </div>
 
+        {/* CHAT BOX */}
         <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
           {activeConversationId
             ? <ChatBox conversationId={activeConversationId} />

@@ -1,5 +1,3 @@
-// server/models/conversation.model.js
-
 import mongoose from "mongoose";
 
 const conversationSchema = new mongoose.Schema(
@@ -15,6 +13,14 @@ const conversationSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    customerName: {
+      type: String,
+      default: null,
+    },
+    customerEmail: {
+      type: String,
+      default: null,
+    },
     status: {
       type: String,
       enum: ["open", "escalated", "closed"],
@@ -25,5 +31,4 @@ const conversationSchema = new mongoose.Schema(
 );
 
 const Conversation = mongoose.model("Conversation", conversationSchema);
-
 export default Conversation;

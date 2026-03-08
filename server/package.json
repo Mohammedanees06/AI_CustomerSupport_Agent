@@ -5,10 +5,11 @@
   "description": "AI Customer Support Server",
   "main": "src/server.js",
   "scripts": {
-   "start": "node server.js",
- "dev": "concurrently \"nodemon src/server.js\" \"nodemon src/services/queue/worker.js\"",
-  "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "start": "node server.js",
+  "dev": "concurrently --names \"REDIS,SERVER,WORKER,NGROK\" \"docker start redis-cache\" \"npx wait-on tcp:6379 && nodemon src/server.js\" \"npx wait-on tcp:6379 && nodemon src/services/queue/worker.js\" \"\\\"C:\\Users\\MOHAMMED ANEES\\AppData\\Roaming\\npm\\ngrok.cmd\\\" http 5000\"",
+  "predev": "npx kill-port 5000",
+   "test": "echo \"Error: no test specified\" && exit 1"
+},
   "keywords": [
     "ai",
     "customer-support",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "wait-on": "^9.0.4"
   }
 }
