@@ -14,6 +14,14 @@ import BusinessGuard from "../routes/BusinessGuard";
 import DashboardLayout from "../layouts/DashboardLayout";
 import BusinessSetup from "../layouts/BusinessSetup";
 
+// Admin
+import AdminRoute from "../routes/AdminRoute";
+import AdminLayout from "../layouts/AdminLayout";
+import AdminOverviewPage from "../pages/admin/AdminOverviewPage";
+import AdminBusinessesPage from "../pages/admin/AdminBusinessesPage";
+
+import OrdersPage from "../pages/dashboard/OrdersPage";
+
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -23,6 +31,7 @@ export default function AppRoutes() {
         <Route path="/register" element={<Register />} />
         <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
 
+        {/* BUSINESS DASHBOARD */}
         <Route
           path="/dashboard"
           element={
@@ -39,6 +48,21 @@ export default function AppRoutes() {
           <Route path="knowledge" element={<Dashboard />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="embed" element={<EmbedPage />} />
+          <Route path="orders" element={<OrdersPage />} />
+        </Route>
+
+        {/* ADMIN PANEL */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          }
+        >
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<AdminOverviewPage />} />
+          <Route path="businesses" element={<AdminBusinessesPage />} />
         </Route>
 
         <Route

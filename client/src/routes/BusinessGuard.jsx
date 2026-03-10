@@ -2,7 +2,7 @@ import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
 export default function BusinessGuard({ children }) {
-  const { initialized, isAuthenticated } = useSelector(
+  const { initialized, isAuthenticated, user } = useSelector(
     (state) => state.auth
   );
 
@@ -10,20 +10,14 @@ export default function BusinessGuard({ children }) {
     (state) => state.business.business
   );
 
-  // wait for auth restore
-  if (!initialized) {
-    return <div>Loading...</div>;
-  }
+  if (!initialized) return <div>Loading...</div>;
 
-  // not logged in → let ProtectedRoute handle it
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // logged in but no business → force onboarding
-  if (!business) {
-    return <Navigate to="/business-setup" replace />;
-  }
+  // ✅ Admin has no business — skip this guard
+  if (user?.role === "admin") return <Navigate to="/admin/dashboard" replace />;
+
+  if (!business) return <Navigate to="/business-setup" replace />;
 
   return children;
 }

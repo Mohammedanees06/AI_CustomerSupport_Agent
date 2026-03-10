@@ -7,19 +7,16 @@ const UserSchema = new mongoose.Schema(
     password: { type: String },
     googleId: { type: String },
     role: {
-  type: String,
-  enum: ["owner", "staff"],
-  default: "owner"
-},
-business: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: "Business"
-}
-
+      type: String,
+      enum: ["owner", "staff"],
+      default: "owner",
+    },
+    business: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Business",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
-
-
 
 export default mongoose.model("User", UserSchema);

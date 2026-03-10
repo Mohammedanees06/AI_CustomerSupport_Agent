@@ -20,27 +20,28 @@ export default function App() {
       return;
     }
 
-    apiClient.get("/auth/me")  
-      .then(async (res) => {
-        dispatch(
-          loginSuccess({
-            user: res.data.user,
-            token,
-          }),
-        );
+   apiClient.get("/auth/me")
+  .then(async (res) => {
+    dispatch(loginSuccess({
+      user: res.data.user,
+      token,
+    }));
 
-        try {
-          const businessRes = await apiClient.get("/business/my"); 
-          dispatch(setBusiness(businessRes.data));
-        } catch (err) {
-          if (err.response?.status !== 404) {
-            console.error(err);
-          }
-        }
-      })
-      .catch(() => {
-        dispatch(logout());
-      });
+    // ✅ Skip business fetch for admin
+    if (res.data.user.role === "admin") return;
+
+    try {
+      const businessRes = await apiClient.get("/business/my");
+      dispatch(setBusiness(businessRes.data));
+    } catch (err) {
+      if (err.response?.status !== 404) {
+        console.error(err);
+      }
+    }
+  })
+  .catch(() => {
+    dispatch(logout());
+  });
   }, [dispatch]);
 
   if (!initialized) {

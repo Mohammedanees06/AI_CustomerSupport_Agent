@@ -4,6 +4,7 @@ import DashboardHeader from "./DashboardHeader";
 const links = [
   { to: "/dashboard/chat", label: "Chat" },
   { to: "/dashboard/tickets", label: "Tickets" },
+  { to: "/dashboard/orders", label: "Orders" },
   { to: "/dashboard/knowledge", label: "Knowledge Base" },
   { to: "/dashboard/analytics", label: "Analytics" },
   { to: "/dashboard/embed", label: "Embed Widget" },

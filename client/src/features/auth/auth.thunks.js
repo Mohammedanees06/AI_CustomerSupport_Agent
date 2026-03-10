@@ -24,34 +24,25 @@ export const loginUser = (formData) => async (dispatch) => {
     localStorage.setItem("token", token);
 
     //  set axios auth immediately
-    apiClient.defaults.headers.common.Authorization =
-      `Bearer ${token}`;
+    apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
 
     // update auth state
-    dispatch(
-      loginSuccess({
-        user,
-        token,
-      })
-    );
+    dispatch(loginSuccess({ user, token }));
+
+    // ✅ Skip business fetch for admin
+    if (user.role === "admin") return;
 
     // load business if exists
     try {
       const businessRes = await apiClient.get("/business/my");
       dispatch(setBusiness(businessRes.data));
     } catch (err) {
-      // 404 = onboarding state (no business yet)
       if (err.response?.status !== 404) {
         console.error(err);
       }
     }
-
   } catch (error) {
-    dispatch(
-      loginFailure(
-        error.response?.data?.message || "Login failed"
-      )
-    );
+    dispatch(loginFailure(error.response?.data?.message || "Login failed"));
   }
 };
 
@@ -69,14 +60,13 @@ export const registerUser = (formData) => async (dispatch) => {
     localStorage.setItem("token", token);
 
     //  sync axios auth
-    apiClient.defaults.headers.common.Authorization =
-      `Bearer ${token}`;
+    apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
 
     dispatch(
       loginSuccess({
         user,
         token,
-      })
+      }),
     );
 
     // try loading business
@@ -88,13 +78,9 @@ export const registerUser = (formData) => async (dispatch) => {
         console.error(err);
       }
     }
-
   } catch (error) {
     dispatch(
-      loginFailure(
-        error.response?.data?.message ||
-        "Registration failed"
-      )
+      loginFailure(error.response?.data?.message || "Registration failed"),
     );
   }
 };

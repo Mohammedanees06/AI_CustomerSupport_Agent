@@ -13,6 +13,11 @@ const BusinessSchema = new mongoose.Schema(
     },
     twilioNumber: {
       type: String,
+    },
+    status: {
+      type: String,
+      enum: ["active", "suspended"],
+      default: "active"
     }
   },
   { timestamps: true }

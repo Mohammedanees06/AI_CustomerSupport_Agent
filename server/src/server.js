@@ -18,6 +18,7 @@ import voiceRoutes from "./routes/voice.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import adminRoutes from "./routes/admin.routes.js";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -67,6 +68,8 @@ app.use("/api/tickets", ticketRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/monitor", monitorRoutes);
 app.use("/api/voice", voiceRoutes);
+app.use("/api/admin", adminRoutes);
+
 
 const server = app.listen(process.env.PORT, () =>
   console.log(`Server running on port ${process.env.PORT}`)

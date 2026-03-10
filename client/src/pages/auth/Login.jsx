@@ -7,7 +7,8 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { loading, error, token } = useSelector((state) => state.auth);
+  const { loading, error, token, user } = useSelector((state) => state.auth);
+
   const hasBusiness = useSelector((state) => !!state.business.business);
 
   const [form, setForm] = useState({
@@ -15,10 +16,14 @@ export default function Login() {
     password: "",
   });
 
-  useEffect(() => {
-    if (!token) return; //  exit early — not logged in
-    navigate(hasBusiness ? "/dashboard" : "/business-setup", { replace: true }); // replace prevents back-button loop
-  }, [token, hasBusiness]); //  navigate omitted to prevent loop
+ useEffect(() => {
+  if (!token) return;
+  if (user?.role === "admin") {
+    navigate("/admin/dashboard", { replace: true });
+    return;
+  }
+  navigate(hasBusiness ? "/dashboard" : "/business-setup", { replace: true });
+}, [token, user, hasBusiness]);
 
   const handleChange = (e) => {
     setForm({
@@ -64,9 +69,7 @@ export default function Login() {
             required
           />
 
-          {error && (
-            <p className="text-red-500 text-sm">{error}</p>
-          )}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
           <button
             type="submit"
