@@ -475,12 +475,12 @@ Conversation continues until hangup
 - [x] Ticket escalation
 - [x] Analytics dashboard
 - [x] Voice support (Twilio)
-- [ ] Voice call button in widget
-- [ ] Embed code page in dashboard
-- [ ] Orders management page
-- [ ] Agent handoff (human takeover)
-- [ ] Widget customization (colors, name)
-- [ ] Production deployment guide
+- [x] Voice call button in widget
+- [x] Embed code page in dashboard
+- [x] Orders management page
+- [x] Agent handoff (human takeover)
+- [x] Widget customization (colors, name)
+- [x] Production deployment guide
 - [ ] WhatsApp integration
 - [ ] Email integration
 
