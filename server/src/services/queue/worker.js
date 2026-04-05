@@ -17,9 +17,7 @@ dotenv.config();
 import connectDB from "../../config/db.js";
 await connectDB();
 
-const publisher = new Redis({
-  host: "127.0.0.1",
-  port: 6379,
+const publisher = new Redis(process.env.REDIS_URL, {
   maxRetriesPerRequest: null,
 });
 
