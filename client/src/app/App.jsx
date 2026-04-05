@@ -11,6 +11,7 @@ export default function App() {
 
   const { initialized } = useSelector((state) => state.auth);
   const { loading } = useSelector((state) => state.app);
+  const theme = useSelector((state) => state.app.theme);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -49,9 +50,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {loading && <Loader />}
-      <AppRoutes />
-    </div>
+    <div className={`min-h-screen bg-gray-50 dark:bg-zinc-950 ${theme === "dark" ? "dark" : ""}`}>
+    {loading && <Loader />}
+    <AppRoutes />
+  </div>
   );
 }

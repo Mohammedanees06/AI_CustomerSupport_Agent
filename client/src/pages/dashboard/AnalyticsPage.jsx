@@ -3,10 +3,10 @@ import { useSelector } from "react-redux";
 import apiClient from "../../services/apiClient";
 
 const StatCard = ({ label, value, sub, color }) => (
-  <div className="bg-white rounded-xl border p-5">
-    <p className="text-sm text-gray-500 mb-1">{label}</p>
-    <p className={`text-3xl font-bold ${color || "text-gray-900"}`}>{value}</p>
-    {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+  <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-5 transition-colors">
+    <p className="text-sm text-[var(--text-muted)] mb-1">{label}</p>
+    <p className={`text-3xl font-bold ${color || "text-[var(--text)]"}`}>{value}</p>
+    {sub && <p className="text-xs text-[var(--text-muted)] mt-1">{sub}</p>}
   </div>
 );
 
@@ -27,7 +27,7 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-400">
+      <div className="flex items-center justify-center h-64 text-[var(--text-muted)]">
         Loading analytics...
       </div>
     );
@@ -35,7 +35,7 @@ export default function AnalyticsPage() {
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-400">
+      <div className="flex items-center justify-center h-64 text-[var(--text-muted)]">
         Failed to load analytics.
       </div>
     );
@@ -45,40 +45,40 @@ export default function AnalyticsPage() {
     <div className="max-w-5xl mx-auto mt-8 px-4">
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <h1 className="text-2xl font-bold text-[var(--text)]">Analytics</h1>
+        <p className="text-[var(--text-muted)] text-sm mt-1">
           Overview of your AI support system performance.
         </p>
       </div>
 
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+      <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
         Core Metrics
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard label="Total Messages" value={data.totalMessages} sub="All customer messages" />
-        <StatCard label="AI Responses" value={data.totalAIResponses} sub="Handled by AI" color="text-blue-600" />
+        <StatCard label="AI Responses" value={data.totalAIResponses} sub="Handled by AI" color="text-blue-500" />
         <StatCard label="Conversations" value={data.totalConversations} sub="Total threads" />
-        <StatCard label="Order Lookups" value={data.totalOrderLookups} sub="Order queries resolved" color="text-purple-600" />
+        <StatCard label="Order Lookups" value={data.totalOrderLookups} sub="Order queries resolved" color="text-purple-500" />
       </div>
 
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+      <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
         Tickets
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-        <StatCard label="Total Tickets Created" value={data.totalTicketsCreated} sub="Escalated to humans" color="text-yellow-600" />
-        <StatCard label="Open Tickets" value={data.openTickets} sub="Needs attention" color="text-red-600" />
-        <StatCard label="Resolved Tickets" value={data.resolvedTickets} sub="Closed successfully" color="text-green-600" />
+        <StatCard label="Total Tickets Created" value={data.totalTicketsCreated} sub="Escalated to humans" color="text-yellow-500" />
+        <StatCard label="Open Tickets" value={data.openTickets} sub="Needs attention" color="text-red-500" />
+        <StatCard label="Resolved Tickets" value={data.resolvedTickets} sub="Closed successfully" color="text-green-500" />
       </div>
 
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+      <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
         AI Performance
       </h2>
-      <div className="bg-white rounded-xl border p-5">
+      <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-5 transition-colors">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-sm text-gray-500">AI Resolution Rate</p>
-          <p className="text-2xl font-bold text-gray-900">{data.resolutionRate}%</p>
+          <p className="text-sm text-[var(--text-muted)]">AI Resolution Rate</p>
+          <p className="text-2xl font-bold text-[var(--text)]">{data.resolutionRate}%</p>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-3">
+        <div className="w-full bg-[var(--border)] rounded-full h-3">
           <div
             className={`h-3 rounded-full transition-all ${
               data.resolutionRate >= 70 ? "bg-green-500"
@@ -88,7 +88,7 @@ export default function AnalyticsPage() {
             style={{ width: `${data.resolutionRate}%` }}
           />
         </div>
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="text-xs text-[var(--text-muted)] mt-2">
           Percentage of messages resolved by AI without human escalation.
         </p>
       </div>

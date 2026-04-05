@@ -21,6 +21,7 @@ import AdminOverviewPage from "../pages/admin/AdminOverviewPage";
 import AdminBusinessesPage from "../pages/admin/AdminBusinessesPage";
 
 import OrdersPage from "../pages/dashboard/OrdersPage";
+import ProfilePage from "../pages/dashboard/ProfilePage";
 
 export default function AppRoutes() {
   return (
@@ -49,6 +50,7 @@ export default function AppRoutes() {
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="embed" element={<EmbedPage />} />
           <Route path="orders" element={<OrdersPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
 
         {/* ADMIN PANEL */}

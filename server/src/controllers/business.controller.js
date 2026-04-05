@@ -51,3 +51,39 @@ export const getMyBusiness = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+/**
+ * UPDATE BUSINESS
+ */
+export const updateBusiness = async (req, res) => {
+  try {
+    const { name, widgetColor, widgetTitle, welcomeMessage } = req.body;
+
+    const business = await Business.findOneAndUpdate(
+      { owner: req.user._id },
+      { name, widgetColor, widgetTitle, welcomeMessage },
+      { new: true }
+    );
+
+    if (!business) return res.status(404).json({ message: "Business not found" });
+
+    res.json(business);
+  } catch (err) {
+    console.error("Update business error:", err);
+    res.status(500).json({ message: "Failed to update business" });
+  }
+};
+
+/**
+ * DELETE BUSINESS
+ */
+export const deleteBusiness = async (req, res) => {
+  try {
+    await Business.findOneAndDelete({ owner: req.user._id });
+    res.json({ message: "Business deleted" });
+  } catch (err) {
+    console.error("Delete business error:", err);
+    res.status(500).json({ message: "Failed to delete business" });
+  }
+};

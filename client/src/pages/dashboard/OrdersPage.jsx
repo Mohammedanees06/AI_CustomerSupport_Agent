@@ -3,10 +3,10 @@ import { useSelector } from "react-redux";
 import apiClient from "../../services/apiClient";
 
 const STATUS_COLORS = {
-  processing: "bg-yellow-100 text-yellow-700",
-  shipped: "bg-blue-100 text-blue-700",
-  delivered: "bg-green-100 text-green-700",
-  cancelled: "bg-red-100 text-red-600",
+  processing: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+  shipped: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  delivered: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  cancelled: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
 const STATUSES = ["processing", "shipped", "delivered", "cancelled"];
@@ -54,7 +54,6 @@ export default function OrdersPage() {
       setError("Order number and email are required.");
       return;
     }
-
     setSubmitting(true);
     try {
       if (editingOrder) {
@@ -64,9 +63,7 @@ export default function OrdersPage() {
           totalAmount: form.totalAmount ? Number(form.totalAmount) : undefined,
           customerEmail: form.customerEmail,
         });
-        setOrders((prev) =>
-          prev.map((o) => (o._id === editingOrder._id ? res.data : o))
-        );
+        setOrders((prev) => prev.map((o) => (o._id === editingOrder._id ? res.data : o)));
       } else {
         const res = await apiClient.post("/orders", {
           businessId,
@@ -125,7 +122,7 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-400">
+      <div className="flex items-center justify-center h-64 text-[var(--text-muted)]">
         Loading orders...
       </div>
     );
@@ -137,12 +134,12 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-          <p className="text-gray-500 text-sm mt-1">{orders.length} total orders</p>
+          <h1 className="text-2xl font-bold text-[var(--text)]">Orders</h1>
+          <p className="text-[var(--text-muted)] text-sm mt-1">{orders.length} total orders</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+          className="bg-[var(--cta)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
         >
           + Add Order
         </button>
@@ -155,12 +152,12 @@ export default function OrdersPage() {
           placeholder="Search by order # or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 border rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400"
+          className="flex-1 border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)] placeholder:text-[var(--text-muted)]"
         />
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="border rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400"
+          className="border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
         >
           <option value="all">All Status</option>
           {STATUSES.map((s) => (
@@ -170,58 +167,54 @@ export default function OrdersPage() {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-xl border overflow-hidden">
+      <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-[var(--bg)] border-b border-[var(--border)]">
             <tr>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Order #</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Customer Email</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Tracking</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Amount</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
+              {["Order #", "Customer Email", "Status", "Tracking", "Amount", "Date", "Actions"].map((h) => (
+                <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-[var(--border)]">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center py-10 text-gray-400">
+                <td colSpan={7} className="text-center py-10 text-[var(--text-muted)]">
                   No orders found
                 </td>
               </tr>
             ) : (
               filtered.map((order) => (
-                <tr key={order._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-800">
-                    #{order.orderNumber}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">{order.customerEmail}</td>
+                <tr key={order._id} className="hover:bg-[var(--bg)] transition-colors">
+                  <td className="px-4 py-3 font-medium text-[var(--text)]">#{order.orderNumber}</td>
+                  <td className="px-4 py-3 text-[var(--text-muted)]">{order.customerEmail}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLORS[order.status]}`}>
                       {order.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {order.trackingNumber || <span className="text-gray-300">—</span>}
+                  <td className="px-4 py-3 text-[var(--text-muted)]">
+                    {order.trackingNumber || <span className="opacity-30">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {order.totalAmount ? `₹${order.totalAmount}` : <span className="text-gray-300">—</span>}
+                  <td className="px-4 py-3 text-[var(--text-muted)]">
+                    {order.totalAmount ? `₹${order.totalAmount}` : <span className="opacity-30">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">
+                  <td className="px-4 py-3 text-[var(--text-muted)] text-xs">
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(order)}
-                        className="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="text-xs px-3 py-1 bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-lg hover:border-[var(--accent)] transition-colors"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(order._id)}
-                        className="text-xs px-3 py-1 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
+                        className="text-xs px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                       >
                         Delete
                       </button>
@@ -236,69 +229,43 @@ export default function OrdersPage() {
 
       {/* ADD / EDIT MODAL */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-lg font-bold text-[var(--text)] mb-4">
               {editingOrder ? "Edit Order" : "Add New Order"}
             </h2>
 
             <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-gray-500 mb-1 block">Order Number</label>
-                <input
-                  type="text"
-                  value={form.orderNumber}
-                  onChange={(e) => setForm({ ...form, orderNumber: e.target.value })}
-                  disabled={!!editingOrder}
-                  placeholder="e.g. ORD-1001"
-                  className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400 disabled:bg-gray-50 disabled:text-gray-400"
-                />
-              </div>
+              {[
+                { label: "Order Number", key: "orderNumber", type: "text", placeholder: "e.g. ORD-1001", disabled: !!editingOrder },
+                { label: "Customer Email", key: "customerEmail", type: "email", placeholder: "customer@email.com" },
+                { label: "Tracking Number", key: "trackingNumber", type: "text", placeholder: "e.g. TRK-5001" },
+                { label: "Total Amount (₹)", key: "totalAmount", type: "number", placeholder: "e.g. 999" },
+              ].map(({ label, key, type, placeholder, disabled }) => (
+                <div key={key}>
+                  <label className="text-xs font-medium text-[var(--text-muted)] mb-1 block">{label}</label>
+                  <input
+                    type={type}
+                    value={form[key]}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                    disabled={disabled}
+                    placeholder={placeholder}
+                    className="w-full border border-[var(--border)] bg-[var(--bg)] text-[var(--text)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)] placeholder:text-[var(--text-muted)] disabled:opacity-50"
+                  />
+                </div>
+              ))}
 
               <div>
-                <label className="text-xs font-medium text-gray-500 mb-1 block">Customer Email</label>
-                <input
-                  type="email"
-                  value={form.customerEmail}
-                  onChange={(e) => setForm({ ...form, customerEmail: e.target.value })}
-                  placeholder="customer@email.com"
-                  className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-gray-500 mb-1 block">Status</label>
+                <label className="text-xs font-medium text-[var(--text-muted)] mb-1 block">Status</label>
                 <select
                   value={form.status}
                   onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400"
+                  className="w-full border border-[var(--border)] bg-[var(--bg)] text-[var(--text)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
                 >
                   {STATUSES.map((s) => (
                     <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
                   ))}
                 </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-gray-500 mb-1 block">Tracking Number</label>
-                <input
-                  type="text"
-                  value={form.trackingNumber}
-                  onChange={(e) => setForm({ ...form, trackingNumber: e.target.value })}
-                  placeholder="e.g. TRK-5001"
-                  className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-gray-500 mb-1 block">Total Amount (₹)</label>
-                <input
-                  type="number"
-                  value={form.totalAmount}
-                  onChange={(e) => setForm({ ...form, totalAmount: e.target.value })}
-                  placeholder="e.g. 999"
-                  className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400"
-                />
               </div>
 
               {error && <p className="text-red-500 text-xs">{error}</p>}
@@ -307,14 +274,14 @@ export default function OrdersPage() {
             <div className="flex gap-3 mt-5">
               <button
                 onClick={closeForm}
-                className="flex-1 border rounded-lg py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                className="flex-1 border border-[var(--border)] rounded-lg py-2 text-sm text-[var(--text-muted)] hover:bg-[var(--bg)] transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="flex-1 bg-gray-900 text-white rounded-lg py-2 text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-60"
+                className="flex-1 bg-[var(--cta)] text-white rounded-lg py-2 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
               >
                 {submitting ? "Saving..." : editingOrder ? "Update Order" : "Create Order"}
               </button>

@@ -4,9 +4,7 @@ import Redis from "ioredis";
 let io;
 
 // Separate Redis client for subscribing (cannot share with BullMQ client)
-const subscriber = new Redis({
-  host: "127.0.0.1",
-  port: 6379,
+const subscriber = new Redis(process.env.REDIS_URL, {
   maxRetriesPerRequest: null,
 });
 

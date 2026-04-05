@@ -18,7 +18,22 @@ const BusinessSchema = new mongoose.Schema(
       type: String,
       enum: ["active", "suspended"],
       default: "active"
-    }
+    },
+    widgetColor: 
+    { 
+      type: String,
+     default: "#111827" 
+    },
+    widgetTitle: 
+    { 
+      type: String, 
+      default: "Support Chat" 
+    },
+    welcomeMessage:
+     { 
+      type: String, 
+      default: "Hi! How can we help you today?"
+     },
   },
   { timestamps: true }
 );

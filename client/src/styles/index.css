@@ -1,1 +1,24 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #f9fafb;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --accent: #004D61;
+  --accent2: #822659;
+  --cta: #3E5641;
+}
+
+.dark {
+  --bg: #1A1A1A;
+  --surface: #222222;
+  --border: #2e2e2e;
+  --text: #F0F0F0;
+  --text-muted: #9a9a9a;
+  --accent: #004D61;
+  --accent2: #822659;
+  --cta: #3E5641;
+}
