@@ -2,6 +2,8 @@
 
 > A production-grade, **AI-powered customer support platform** built with the MERN stack — featuring a realtime chat widget, RAG knowledge base, voice support, ticket escalation, and a multi-tenant business dashboard.
 
+Live link: [ai-customer-support-system.netlify.app](https://ai-customer-support-system.netlify.app/)
+
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org)
 [![React](https://img.shields.io/badge/React-18-blue)](https://reactjs.org)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)](https://mongodb.com)
