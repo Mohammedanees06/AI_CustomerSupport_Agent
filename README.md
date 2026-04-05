@@ -2,8 +2,10 @@
 
 > A production-grade, **AI-powered customer support platform** built with the MERN stack — featuring a realtime chat widget, RAG knowledge base, voice support, ticket escalation, and a multi-tenant business dashboard.
 
-## 🏢 Business/Admin Panel
-[Access Dashboard](https://ai-customer-support-system.netlify.app/)
+## Live link
+
+🏢 Dashboard: [ai-customer-support-system.netlify.app](http://ai-customer-support-system.netlify.app/)
+💬 Widget Demo: [chat-support-widget.netlify.app](https://chat-support-widget.netlify.app/)
 
 Demo Login
 Email: demo@aicustomer.com
