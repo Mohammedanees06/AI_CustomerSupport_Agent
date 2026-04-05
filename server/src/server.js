@@ -67,7 +67,9 @@ app.use("/api/knowledge", knowledgeRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/monitor", monitorRoutes);
-app.use("/api/voice", voiceRoutes);
+app.use("/api/voice", (req, res) => {
+  res.status(503).json({ message: "Voice feature is currently unavailable." });
+});
 app.use("/api/admin", adminRoutes);
 
 
