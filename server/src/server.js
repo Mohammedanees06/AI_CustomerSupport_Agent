@@ -10,6 +10,7 @@ import chatRoutes from "./routes/chat.routes.js";
 import businessRoutes from "./routes/business.routes.js";
 import { initSocket } from "./config/socket.js";
 import "./config/redis.js";
+import "./services/queue/worker.js";
 import knowledgeRoutes from "./routes/knowledge.routes.js";
 import ticketRoutes from "./routes/ticket.routes.js";
 import orderRoutes from "./routes/order.routes.js";
