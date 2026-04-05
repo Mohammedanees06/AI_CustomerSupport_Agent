@@ -5,7 +5,7 @@
   "description": "AI Customer Support Server",
   "main": "src/server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node src/server.js.",
     "dev": "concurrently --names \"REDIS,SERVER,WORKER,NGROK\" \"docker start redis-cache\" \"npx wait-on tcp:6379 && nodemon src/server.js\" \"npx wait-on tcp:6379 && nodemon src/services/queue/worker.js\" \"\\\"C:\\Users\\MOHAMMED ANEES\\AppData\\Roaming\\npm\\ngrok.cmd\\\" http 5000\"",
     "predev": "npx kill-port 5000",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -39,6 +39,7 @@
     "openai": "^4.104.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "pdf-parse": "^2.4.5",
     "redis": "^5.10.0",
     "socket.io": "^4.8.3",
     "twilio": "^5.12.2",
