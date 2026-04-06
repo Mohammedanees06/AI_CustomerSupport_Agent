@@ -50,9 +50,11 @@ export default function App() {
   }
 
   return (
-    <div className={`min-h-screen bg-gray-50 dark:bg-zinc-950 ${theme === "dark" ? "dark" : ""}`}>
-    {loading && <Loader />}
-    <AppRoutes />
+  <div className={theme === "dark" ? "dark" : ""}>
+    <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
+      {loading && <Loader />}
+      <AppRoutes />
+    </div>
   </div>
-  );
+);
 }
