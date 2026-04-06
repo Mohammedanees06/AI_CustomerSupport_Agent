@@ -23,11 +23,13 @@ import AdminBusinessesPage from "../pages/admin/AdminBusinessesPage";
 import OrdersPage from "../pages/dashboard/OrdersPage";
 import ProfilePage from "../pages/dashboard/ProfilePage";
 
+import LandingPage from "../pages/LandingPage";
+
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />

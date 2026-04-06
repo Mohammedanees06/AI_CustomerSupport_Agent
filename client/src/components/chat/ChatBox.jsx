@@ -30,7 +30,7 @@ export default function ChatBox({ conversationId }) {
       })
       .catch((err) => console.error(err));
 
-    // ✅ Join socket room and listen for new messages
+    // Join socket room and listen for new messages
     const socket = getSocket();
     if (socket) {
       socket.emit("join-conversation", { conversationId });

@@ -28,7 +28,7 @@ export default function App() {
       token,
     }));
 
-    // ✅ Skip business fetch for admin
+    // Skip business fetch for admin
     if (res.data.user.role === "admin") return;
 
     try {

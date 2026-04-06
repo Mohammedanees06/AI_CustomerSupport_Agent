@@ -6,7 +6,7 @@ export default function EmbedPage() {
   const businessName = useSelector((state) => state.business.business?.name);
   const [copied, setCopied] = useState(false);
 
-  const serverUrl = "http://localhost:5000"; // we have to change to production URL when deploying
+ const serverUrl = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:5000";
 
   const embedCode = `<script
   src="${serverUrl}/widget.js"

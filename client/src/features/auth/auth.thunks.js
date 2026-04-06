@@ -29,7 +29,7 @@ export const loginUser = (formData) => async (dispatch) => {
     // update auth state
     dispatch(loginSuccess({ user, token }));
 
-    // ✅ Skip business fetch for admin
+    // Skip business fetch for admin
     if (user.role === "admin") return;
 
     // load business if exists
