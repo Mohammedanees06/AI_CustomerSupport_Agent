@@ -3,6 +3,7 @@ import { Outlet, NavLink } from "react-router-dom";
 import DashboardHeader from "./DashboardHeader";
 
 const links = [
+  { to: "/dashboard", label: "🏠 Dashboard" },
   { to: "/dashboard/chat", label: "💬 Chat" },
   { to: "/dashboard/tickets", label: "🎫 Tickets" },
   { to: "/dashboard/orders", label: "📦 Orders" },
