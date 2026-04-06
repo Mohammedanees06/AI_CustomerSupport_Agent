@@ -105,22 +105,29 @@ const worker = new Worker(
       let finalAiReply = aiResult.answer;
       console.log("DEBUG: AI reply prepared:", finalAiReply);
 
-      const confidence = aiResult.confidence ?? 0.5;
-      console.log("DEBUG: AI confidence:", confidence);
+     let confidence = aiResult.confidence ?? 0.5;
+if (
+  finalAiReply.toLowerCase().includes("don't have that information") ||
+  finalAiReply.toLowerCase().includes("connect you with a human")
+) {
+  confidence = 0.3;
+  console.log("DEBUG: Confidence overridden to 0.3 (AI admitted no knowledge)");
+}
+console.log("DEBUG: AI confidence:", confidence);
 
       /**
        * CONFIDENCE-BASED ESCALATION
-       * ✅ Now stores conversationId, aiResponse, and confidenceScore
+       *  Now stores conversationId, aiResponse, and confidenceScore
        */
       if (confidence < 0.6) {
         console.log("DEBUG: Low confidence detected → creating ticket");
 
         await Ticket.create({
           business: businessId,
-          conversation: conversationId,       // ✅ link to conversation
+          conversation: conversationId,       // link to conversation
           customerMessage: message,
-          aiResponse: finalAiReply,           // ✅ what AI said
-          confidenceScore: confidence,        // ✅ why it was escalated
+          aiResponse: finalAiReply,           // what AI said
+          confidenceScore: confidence,        // why it was escalated
         });
 
         await incrementMetric(businessId, "totalTicketsCreated");
