@@ -71,46 +71,46 @@ export default function ProfilePage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Business Profile</h1>
-        <p className="text-gray-500 text-sm mt-1">Manage your business settings and widget customization.</p>
+        <h1 className="text-2xl font-bold text-[var(--text)]">Business Profile</h1>
+        <p className="text-[var(--text-muted)] text-sm mt-1">Manage your business settings and widget customization.</p>
       </div>
 
       {/* General Info */}
-      <div className="bg-white rounded-2xl border p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">General</h2>
+      <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide">General</h2>
 
         <div>
-          <label className="text-xs font-medium text-gray-500 mb-1 block">Business Name</label>
+          <label className="text-xs font-medium text-[var(--text-muted)] mb-1 block">Business Name</label>
           <input
             type="text"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400 bg-[var(--bg)] text-[var(--text)]"
           />
         </div>
 
         <div>
-          <label className="text-xs font-medium text-gray-500 mb-1 block">Business ID</label>
+          <label className="text-xs font-medium text-[var(--text-muted)] mb-1 block">Business ID</label>
           <div className="flex items-center gap-2">
             <input
               type="text"
               value={business?._id || ""}
               readOnly
-              className="flex-1 border rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-400 outline-none"
+              className="flex-1 border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg)] text-[var(--text-muted)] outline-none"
             />
             <button
               onClick={handleCopy}
-              className="px-3 py-2 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+              className="px-3 py-2 text-xs bg-[var(--bg)] text-[var(--text-muted)] border border-[var(--border)] rounded-lg hover:opacity-80 transition-colors whitespace-nowrap"
             >
               {copied ? "✓ Copied" : "Copy ID"}
             </button>
           </div>
-          <p className="text-xs text-gray-400 mt-1">Used in your embed script and API calls.</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">Used in your embed script and API calls.</p>
         </div>
 
         <div>
-          <label className="text-xs font-medium text-gray-500 mb-1 block">Created</label>
-          <p className="text-sm text-gray-600">
+          <label className="text-xs font-medium text-[var(--text-muted)] mb-1 block">Created</label>
+          <p className="text-sm text-[var(--text)]">
             {business?.createdAt ? new Date(business.createdAt).toLocaleDateString("en-IN", {
               day: "numeric", month: "long", year: "numeric"
             }) : "—"}
@@ -119,43 +119,41 @@ export default function ProfilePage() {
       </div>
 
       {/* Widget Customization */}
-      <div className="bg-white rounded-2xl border p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Widget Customization</h2>
+      <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide">Widget Customization</h2>
 
         <div>
-          <label className="text-xs font-medium text-gray-500 mb-1 block">Chat Title</label>
+          <label className="text-xs font-medium text-[var(--text-muted)] mb-1 block">Chat Title</label>
           <input
             type="text"
             value={form.widgetTitle}
             onChange={(e) => setForm({ ...form, widgetTitle: e.target.value })}
             placeholder="Support Chat"
-            className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400 bg-[var(--bg)] text-[var(--text)]"
           />
         </div>
 
         <div>
-          <label className="text-xs font-medium text-gray-500 mb-1 block">Welcome Message</label>
+          <label className="text-xs font-medium text-[var(--text-muted)] mb-1 block">Welcome Message</label>
           <textarea
             value={form.welcomeMessage}
             onChange={(e) => setForm({ ...form, welcomeMessage: e.target.value })}
             placeholder="Hi! How can we help you today?"
             rows={3}
-            className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400 resize-none"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400 resize-none bg-[var(--bg)] text-[var(--text)]"
           />
         </div>
 
         <div>
-          <label className="text-xs font-medium text-gray-500 mb-2 block">Widget Color</label>
+          <label className="text-xs font-medium text-[var(--text-muted)] mb-2 block">Widget Color</label>
           <div className="flex items-center gap-3">
             <input
               type="color"
               value={form.widgetColor}
               onChange={(e) => setForm({ ...form, widgetColor: e.target.value })}
-              className="w-10 h-10 rounded-lg border cursor-pointer"
+              className="w-10 h-10 rounded-lg border border-[var(--border)] cursor-pointer"
             />
-            <span className="text-sm text-gray-500 font-mono">{form.widgetColor}</span>
-
-            {/* Color presets */}
+            <span className="text-sm text-[var(--text-muted)] font-mono">{form.widgetColor}</span>
             <div className="flex gap-2 ml-2">
               {["#111827", "#2563eb", "#7c3aed", "#059669", "#dc2626"].map((color) => (
                 <button
@@ -173,8 +171,8 @@ export default function ProfilePage() {
 
         {/* Live Preview */}
         <div>
-          <label className="text-xs font-medium text-gray-500 mb-2 block">Preview</label>
-          <div className="border rounded-xl overflow-hidden w-64 shadow-sm">
+          <label className="text-xs font-medium text-[var(--text-muted)] mb-2 block">Preview</label>
+          <div className="border border-[var(--border)] rounded-xl overflow-hidden w-64 shadow-sm">
             <div
               className="px-4 py-3 flex items-center gap-2"
               style={{ backgroundColor: form.widgetColor }}
@@ -182,8 +180,8 @@ export default function ProfilePage() {
               <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-sm">🤖</div>
               <span className="text-white text-sm font-medium">{form.widgetTitle || "Support Chat"}</span>
             </div>
-            <div className="bg-gray-50 px-4 py-3">
-              <div className="bg-white rounded-lg px-3 py-2 text-xs text-gray-600 shadow-sm inline-block">
+            <div className="bg-[var(--bg)] px-4 py-3">
+              <div className="bg-[var(--surface)] rounded-lg px-3 py-2 text-xs text-[var(--text)] shadow-sm inline-block">
                 {form.welcomeMessage || "Hi! How can we help you today?"}
               </div>
             </div>
@@ -193,50 +191,51 @@ export default function ProfilePage() {
 
       {/* Save button */}
       {success && (
-        <p className="text-green-600 text-sm bg-green-50 border border-green-100 rounded-lg px-4 py-2">{success}</p>
+        <p className="text-green-500 text-sm bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-2">{success}</p>
       )}
       {error && (
-        <p className="text-red-500 text-sm bg-red-50 border border-red-100 rounded-lg px-4 py-2">{error}</p>
+        <p className="text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2">{error}</p>
       )}
 
       <button
         onClick={handleSave}
         disabled={saving}
-        className="w-full bg-gray-900 text-white py-3 rounded-xl font-medium text-sm hover:bg-gray-700 transition-colors disabled:opacity-50"
+        className="w-full text-white py-3 rounded-xl font-medium text-sm transition-colors disabled:opacity-50"
+        style={{ backgroundColor: "var(--accent)" }}
       >
         {saving ? "Saving..." : "Save Changes"}
       </button>
 
       {/* Danger Zone */}
-      <div className="bg-white rounded-2xl border border-red-100 p-6 space-y-3">
+      <div className="bg-[var(--surface)] rounded-2xl border border-red-500/20 p-6 space-y-3">
         <h2 className="text-sm font-semibold text-red-500 uppercase tracking-wide">Danger Zone</h2>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-[var(--text-muted)]">
           Deleting your business will permanently remove all conversations, tickets, knowledge base, and orders. This cannot be undone.
         </p>
 
         {!showDeleteConfirm ? (
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="px-4 py-2 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+            className="px-4 py-2 text-sm text-red-500 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors"
           >
             Delete Business
           </button>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-gray-600">
-              Type <span className="font-semibold text-gray-900">{business?.name}</span> to confirm deletion:
+            <p className="text-sm text-[var(--text)]">
+              Type <span className="font-semibold">{business?.name}</span> to confirm deletion:
             </p>
             <input
               type="text"
               value={deleteInput}
               onChange={(e) => setDeleteInput(e.target.value)}
               placeholder={business?.name}
-              className="w-full border border-red-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-red-400"
+              className="w-full border border-red-500/30 rounded-lg px-3 py-2 text-sm outline-none focus:border-red-400 bg-[var(--bg)] text-[var(--text)]"
             />
             <div className="flex gap-2">
               <button
                 onClick={() => { setShowDeleteConfirm(false); setDeleteInput(""); }}
-                className="flex-1 border rounded-lg py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                className="flex-1 border border-[var(--border)] rounded-lg py-2 text-sm text-[var(--text)] hover:bg-[var(--bg)] transition-colors"
               >
                 Cancel
               </button>
