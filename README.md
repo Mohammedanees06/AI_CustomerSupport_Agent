@@ -2,16 +2,28 @@
 
 > A production-grade, **AI-powered customer support platform** built with the MERN stack — featuring a realtime chat widget, RAG knowledge base, voice support, ticket escalation, and a multi-tenant business dashboard.
 
-## Live link
+## Live Demo
 
-🏢 Dashboard: [ai-customer-support-system.netlify.app](http://ai-customer-support-system.netlify.app/)
-💬 Widget Demo: [chat-support-widget.netlify.app](https://chat-support-widget.netlify.app/)
+🏢 **Business Dashboard:** [ai-customer-support-system.netlify.app](https://ai-customer-support-system.netlify.app/)
+💬 **Customer Widget Demo:** [chat-support-widget.netlify.app](https://chat-support-widget.netlify.app/)
 
-Demo Login
-Email: demo@aicustomer.com
-Password: demo1234
+### Demo Login (Business Owner)
+| | |
+|---|---|
+| Email | demo@aicustomer.com |
+| Password | demo1234 |
 
+> ⚠️ Backend is on free tier — may take ~30 seconds to wake up on first visit.
 
+### How to Test
+1. Open the **Customer Widget Demo** — interact as a customer
+   - Ask: `What are your clinic timings?`
+   - Ask: `where is my order ORD-1001`
+2. Open the **Business Dashboard** and login with demo credentials
+3. See conversations, tickets, and analytics appear in real time
+
+### ⚠️ Voice Feature
+Voice calling is powered by Twilio but is currently disabled on the live demo to preserve API credits. The full implementation includes STT (Speech-to-Text), TTS (Text-to-Speech), and a real-time voice pipeline — code available in the repository.git
 ## User Panel
 
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org)
