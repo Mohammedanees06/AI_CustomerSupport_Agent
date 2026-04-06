@@ -33,6 +33,7 @@ export default function Login() {
   const handleGoogleLogin = () => {
     window.location.href = `${import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:5000"}/api/auth/google`;
   };
+  console.log(import.meta.env.VITE_API_URL)
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: "var(--bg)" }}>
