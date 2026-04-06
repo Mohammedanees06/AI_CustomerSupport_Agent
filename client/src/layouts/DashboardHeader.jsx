@@ -13,7 +13,7 @@ const PAGE_TITLES = {
   profile: "Profile",
 };
 
-export default function DashboardHeader() {
+export default function DashboardHeader({ onMenuClick }) {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const theme = useSelector((state) => state.app.theme);
@@ -29,7 +29,17 @@ export default function DashboardHeader() {
   return (
     <header className="h-14 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between px-6 transition-colors">
 
-      <h1 className="font-semibold text-gray-800 dark:text-white text-sm tracking-wide">{pageTitle}</h1>
+      <div className="flex items-center gap-3">
+        {/* Mobile hamburger */}
+        <button
+          onClick={onMenuClick}
+          className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300"
+        >
+          ☰
+        </button>
+
+        <h1 className="font-semibold text-gray-800 dark:text-white text-sm tracking-wide">{pageTitle}</h1>
+      </div>
 
       <div className="flex items-center gap-3">
 
@@ -47,7 +57,7 @@ export default function DashboardHeader() {
           <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
             {user?.name?.charAt(0)?.toUpperCase() || "U"}
           </div>
-          <span className="text-sm text-gray-600 dark:text-zinc-400">{user?.name || "User"}</span>
+          <span className="text-sm text-gray-600 dark:text-zinc-400 hidden sm:block">{user?.name || "User"}</span>
         </div>
 
         <button

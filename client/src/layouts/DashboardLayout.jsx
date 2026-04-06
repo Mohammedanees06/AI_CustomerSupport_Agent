@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import DashboardHeader from "./DashboardHeader";
 
@@ -12,26 +13,63 @@ const links = [
 ];
 
 export default function DashboardLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className="min-h-screen flex bg-gray-100 dark:bg-zinc-950 transition-colors">
+    <div className="min-h-screen flex" style={{ background: "var(--bg)" }}>
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Sidebar */}
-      <aside className="w-60 bg-gray-900 dark:bg-zinc-900 border-r border-gray-800 dark:border-zinc-800 flex flex-col p-5 transition-colors">
-        <div className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white text-sm">🤖</div>
-          <h2 className="text-white font-bold text-base">AI Support</h2>
+      <aside
+        className={`
+          fixed md:static inset-y-0 left-0 z-30
+          w-60 flex flex-col p-5 border-r transition-transform duration-300
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `}
+        style={{
+          background: "var(--accent)",
+          borderColor: "rgba(255,255,255,0.08)",
+        }}
+      >
+        {/* Logo */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
+              style={{ background: "rgba(255,255,255,0.15)", color: "#fff" }}
+            >
+              🤖
+            </div>
+            <span className="text-white font-bold text-base tracking-tight">SupportAI</span>
+          </div>
+          {/* Close button mobile */}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden text-white/60 hover:text-white text-lg leading-none"
+          >
+            ✕
+          </button>
         </div>
 
-        <nav className="space-y-1 flex-1">
+        {/* Nav links */}
+        <nav className="space-y-0.5 flex-1">
           {links.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
+              onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
-                `block px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive
-                    ? "bg-indigo-600 text-white font-medium"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                    ? "bg-white/20 text-white shadow-sm"
+                    : "text-white/60 hover:text-white hover:bg-white/10"
                 }`
               }
             >
@@ -39,12 +77,20 @@ export default function DashboardLayout() {
             </NavLink>
           ))}
         </nav>
+
+        {/* Bottom brand */}
+        <div className="mt-6 pt-4 border-t border-white/10">
+          <p className="text-[11px] text-white/30 font-mono tracking-widest uppercase">SupportAI v1.0</p>
+        </div>
       </aside>
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col">
-        <DashboardHeader />
-        <main className="flex-1 bg-gray-100 dark:bg-zinc-950 p-6 overflow-auto transition-colors">
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
+        <main
+          className="flex-1 p-4 md:p-6 overflow-auto"
+          style={{ background: "var(--bg)" }}
+        >
           <Outlet />
         </main>
       </div>

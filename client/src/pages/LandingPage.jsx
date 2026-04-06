@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const FEATURES = [
   { icon: "🧠", title: "RAG Knowledge Retrieval", desc: "Upload docs or text. The AI searches your knowledge base using vector embeddings to answer accurately." },
@@ -25,10 +26,19 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
 
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const business = useSelector((state) => state.business.business);
+
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
+
+  // Determine dashboard link based on role
+  const getDashboardPath = () => {
+    if (user?.role === "admin") return "/admin/dashboard";
+    return business ? "/dashboard/chat" : "/business-setup";
+  };
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
@@ -47,12 +57,42 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link to="/login" className="text-sm font-medium px-4 py-2 rounded-lg border hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)", borderColor: "var(--border)", background: "transparent" }}>
-            Log in
-          </Link>
-          <Link to="/register" className="text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity" style={{ background: "var(--accent)", color: "#fff" }}>
-            Get started
-          </Link>
+          {isAuthenticated ? (
+            // ✅ Logged in — show user avatar + dashboard button
+            <>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text-muted)" }}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ background: "var(--accent)" }}>
+                  {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                </div>
+                <span>{user?.name}</span>
+              </div>
+              <button
+                onClick={() => navigate(getDashboardPath())}
+                className="text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                style={{ background: "var(--accent)", color: "#fff" }}
+              >
+                Go to Dashboard →
+              </button>
+            </>
+          ) : (
+            // ✅ Not logged in — show login + register
+            <>
+              <Link
+                to="/login"
+                className="text-sm font-medium px-4 py-2 rounded-lg border hover:opacity-80 transition-opacity"
+                style={{ color: "var(--text-muted)", borderColor: "var(--border)", background: "transparent" }}
+              >
+                Log in
+              </Link>
+              <Link
+                to="/register"
+                className="text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                style={{ background: "var(--accent)", color: "#fff" }}
+              >
+                Get started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -75,20 +115,49 @@ export default function LandingPage() {
         </p>
 
         <div className={`flex flex-wrap gap-3 justify-center transition-all duration-700 delay-300 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}>
-          <button onClick={() => window.open("https://ai-customer-support-system.netlify.app", "_blank")} className="px-6 py-3 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity" style={{ background: "var(--accent)", color: "#fff" }}>
-            Open Dashboard
-          </button>
-          <button onClick={() => window.open("https://chat-support-widget.netlify.app", "_blank")} className="px-6 py-3 rounded-lg font-medium text-sm border hover:opacity-80 transition-opacity" style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--surface)" }}>
+          {isAuthenticated ? (
+            <button
+              onClick={() => navigate(getDashboardPath())}
+              className="px-6 py-3 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
+              style={{ background: "var(--accent)", color: "#fff" }}
+            >
+              Open Dashboard →
+            </button>
+          ) : (
+            <button
+              onClick={() => window.open("https://ai-customer-support-system.netlify.app", "_blank")}
+              className="px-6 py-3 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
+              style={{ background: "var(--accent)", color: "#fff" }}
+            >
+              Open Dashboard
+            </button>
+          )}
+          <button
+            onClick={() => window.open("https://chat-support-widget.netlify.app", "_blank")}
+            className="px-6 py-3 rounded-lg font-medium text-sm border hover:opacity-80 transition-opacity"
+            style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--surface)" }}
+          >
             Try the widget →
           </button>
-          <button onClick={() => window.open("https://github.com/Mohammedanees06/AI_CustomerSupport_Agent", "_blank")} className="px-6 py-3 rounded-lg font-medium text-sm border hover:opacity-80 transition-opacity" style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--surface)" }}>
+          <button
+            onClick={() => window.open("https://github.com/Mohammedanees06/AI_CustomerSupport_Agent", "_blank")}
+            className="px-6 py-3 rounded-lg font-medium text-sm border hover:opacity-80 transition-opacity"
+            style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--surface)" }}
+          >
             View source
           </button>
         </div>
 
-        <p className={`mt-6 text-xs font-mono transition-all duration-700 delay-500 ${visible ? "opacity-100" : "opacity-0"}`} style={{ color: "var(--text-muted)" }}>
-          demo@aicustomer.com · demo1234
-        </p>
+        {/* Show greeting if logged in, demo creds if not */}
+        {isAuthenticated ? (
+          <p className={`mt-6 text-xs font-mono transition-all duration-700 delay-500 ${visible ? "opacity-100" : "opacity-0"}`} style={{ color: "var(--text-muted)" }}>
+            👋 Welcome back, {user?.name}
+          </p>
+        ) : (
+          <p className={`mt-6 text-xs font-mono transition-all duration-700 delay-500 ${visible ? "opacity-100" : "opacity-0"}`} style={{ color: "var(--text-muted)" }}>
+            demo@aicustomer.com · demo1234
+          </p>
+        )}
       </section>
 
       <hr style={{ borderColor: "var(--border)" }} />
@@ -150,11 +219,19 @@ export default function LandingPage() {
           Open the widget as a customer, then login to the dashboard to watch it happen in real time.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
-          <button onClick={() => window.open("https://chat-support-widget.netlify.app", "_blank")} className="px-6 py-3 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity" style={{ background: "var(--accent)", color: "#fff" }}>
+          <button
+            onClick={() => window.open("https://chat-support-widget.netlify.app", "_blank")}
+            className="px-6 py-3 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
+            style={{ background: "var(--accent)", color: "#fff" }}
+          >
             Try the widget
           </button>
-          <button onClick={() => navigate("/login")} className="px-6 py-3 rounded-lg font-medium text-sm border hover:opacity-80 transition-opacity" style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--surface)" }}>
-            Business login
+          <button
+            onClick={() => isAuthenticated ? navigate(getDashboardPath()) : navigate("/login")}
+            className="px-6 py-3 rounded-lg font-medium text-sm border hover:opacity-80 transition-opacity"
+            style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--surface)" }}
+          >
+            {isAuthenticated ? "Go to dashboard →" : "Business login"}
           </button>
         </div>
         <p className="mt-6 text-xs font-mono" style={{ color: "var(--text-muted)" }}>
