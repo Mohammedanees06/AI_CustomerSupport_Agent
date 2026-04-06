@@ -22,3 +22,9 @@
   --accent2: #822659;
   --cta: #3E5641;
 }
+
+input, textarea, select {
+  background-color: var(--bg);
+  color: var(--text);
+  border-color: var(--border);
+}
