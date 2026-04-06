@@ -16,13 +16,9 @@ export default function ChatBox({ conversationId }) {
 
   const [text, setText] = useState("");
 
-  // ===============================
-  // LOAD MESSAGE HISTORY + SOCKET
-  // ===============================
   useEffect(() => {
     if (!conversationId) return;
 
-    // Load history from DB
     axios
       .get(`/chat/history/${conversationId}`)
       .then((res) => {
@@ -30,13 +26,11 @@ export default function ChatBox({ conversationId }) {
       })
       .catch((err) => console.error(err));
 
-    // Join socket room and listen for new messages
     const socket = getSocket();
     if (socket) {
       socket.emit("join-conversation", { conversationId });
 
       const handleNewMessage = (msg) => {
-        // Only add if message belongs to this conversation
         const msgConvId = msg.conversation?._id || msg.conversation;
         if (msgConvId?.toString() === conversationId?.toString()) {
           dispatch(addMessage(msg));
@@ -45,16 +39,12 @@ export default function ChatBox({ conversationId }) {
 
       socket.on("new-message", handleNewMessage);
 
-      // Cleanup listener when conversation changes
       return () => {
         socket.off("new-message", handleNewMessage);
       };
     }
   }, [conversationId, dispatch]);
 
-  // ===============================
-  // AGENT REPLY
-  // ===============================
   const handleSend = async () => {
     if (!text.trim() || !conversationId) return;
 
@@ -84,7 +74,7 @@ export default function ChatBox({ conversationId }) {
       {/* Messages */}
       <div className="flex-1 space-y-3 overflow-y-auto mb-3">
         {messages.length === 0 ? (
-          <p className="text-gray-400 text-sm">No messages yet</p>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>No messages yet</p>
         ) : (
           messages.map((msg, index) => (
             <Message key={msg._id || index} message={msg} />
@@ -93,8 +83,11 @@ export default function ChatBox({ conversationId }) {
       </div>
 
       {/* Agent Reply Input */}
-      <div className="flex flex-col border-t pt-3 gap-1">
-        <p className="text-xs text-gray-400">
+      <div
+        className="flex flex-col border-t pt-3 gap-1"
+        style={{ borderColor: "var(--border)" }}
+      >
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
           💬 Replying as <strong>Agent</strong> — customer will see this in the widget
         </p>
         <div className="flex gap-2">
@@ -103,11 +96,17 @@ export default function ChatBox({ conversationId }) {
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder="Type a reply to the customer..."
-            className="flex-1 border rounded px-3 py-2"
+            className="flex-1 border rounded px-3 py-2 text-sm outline-none"
+            style={{
+              background: "var(--bg)",
+              borderColor: "var(--border)",
+              color: "var(--text)",
+            }}
           />
           <button
             onClick={handleSend}
-            className="bg-gray-900 text-white px-4 rounded"
+            className="text-white px-4 rounded text-sm"
+            style={{ background: "var(--accent)" }}
           >
             Send
           </button>

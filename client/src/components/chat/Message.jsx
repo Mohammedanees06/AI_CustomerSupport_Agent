@@ -10,11 +10,15 @@ export default function Message({ message }) {
           isUser
             ? "bg-gray-900 text-white"
             : isAgent
-            ? "bg-blue-600 text-white"   // agent replies in blue
-            : "bg-white border"           // AI in white
+            ? "bg-blue-600 text-white"
+            : "border"
         }`}
+        style={isAI ? {
+          background: "var(--surface)",
+          borderColor: "var(--border)",
+          color: "var(--text)"
+        } : {}}
       >
-        {/* Sender label for agent */}
         {isAgent && (
           <p className="text-[10px] text-blue-200 mb-1 font-medium">Agent</p>
         )}
